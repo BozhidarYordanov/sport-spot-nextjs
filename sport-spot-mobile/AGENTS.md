@@ -8,8 +8,11 @@ Here we manage the React Native Expo app targeting iOS and Android. This is a cl
 - **Data Layer**: Communicates with the backend strictly via a secure RESTful API exposed by the Next.js application. No direct database access or ORM is permitted here.
 - **Back-end API** source code: `..\sport-spot-web\src\app\api`
 - **Token Management**: JWT tokens acquired during login/register must be saved locally using `expo-secure-store`. Every request to protected API routes must inject this token into the `Authorization: Bearer <token>` header.
+- **Use modular design**: split the app into self-contained components, to avoid complex files with too much code
 
 ## Mobile Native UI/UX Guidelines
+- **Implement user-fiendly UI**, stack navigation, responsive layout (for tablets/smarphones)
+- **Mobile UI Alerts**: ensure all native alerts, confirms and other system dialogs have a fallback for Web (implemented as modal popups)
 - **Layout Responsiveness**: Rely entirely on Flexbox and relative dimensions to handle small smartphones as well as larger tablets cleanly. Wrap layouts in `SafeAreaView` components.
 - **Native Interactions**: Implement touch-optimized micro-interactions using `Pressable` with customized scale-down feedback on press.
 - **Performance Cues**: Use native components like `ActivityIndicator` or skeleton placeholders during network requests. Implement pull-to-refresh (`RefreshControl`) and infinite scrolling on long lists.

@@ -17,8 +17,11 @@ Here we manage the Next.js Web application, the central RESTful API for the mobi
 - **Performance & Scalability**:
   - Implement server-side pagination (limit & offset) for the `schedule` log and `workout_types` grid.
   - Create database indexes on `schedule.start_time` and `bookings.user_id` to maintain query performance under heavy loads.
+  - **Use modular design**: split the app into self-contained components, to avoid complex files with too much code
 
 ## Web UI/UX & Tailwind Guidelines
+- **Implement modern UI**, responsive design, use server-rendered components in Next.js
+- Use **server-side rendering**, only ise client components for browser interaction and forms
 - **Visual Polish & Glassmorphism**: Use soft shadows (`shadow-xl`), rounded corners (`rounded-2xl`), and subtle borders. For component overlays, use Tailwind's `backdrop-blur-md bg-white/30 border border-white/20`.
 - **Micro-interactions**: Every button and clickable card must use transitions (`transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`).
 - **Typography**: Use a high-quality sans-serif font via `next/font` (e.g., 'Inter'). Headings must be `font-bold tracking-tight`.
@@ -38,4 +41,4 @@ Here we manage the Next.js Web application, the central RESTful API for the mobi
 10. **Manage Schedule Modals/Subpages (`/admin/schedule`)**: A rigorous management board allowing admins to create, edit, or delete schedule slots with real-time room conflict detection.
 
 ## Authentication Guardrails
-- Secure all API endpoints (`/api/*`), Server Actions, and Web Pages using Next.js Middleware. Route unauthorized users back to `/login`. Check user roles explicitly for `/admin` routes.
+- Secure all API endpoints (`src\app\api/*`), Server Actions, and Web Pages using Next.js Middleware. Route unauthorized users back to `/login`. Check user roles explicitly for `/admin` routes.
