@@ -4,7 +4,17 @@
   "description": "SportSpot app: Next.js + React +  Expo",
   "license": "ISC",
   "author": "Bozhidar Yordanov",
+  "private": true,
   "type": "commonjs",
+  "workspaces": [
+    "sport-spot-web",
+    "sport-spot-mobile"
+  ],
   "scripts": {
+    "build": "npm run -ws --if-present build",
+    "dev": "concurrently -n web,mobile -c \"cyan,magenta\" \"npm run -w sport-spot-web dev\" \"npm run -w sport-spot-mobile start\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }
