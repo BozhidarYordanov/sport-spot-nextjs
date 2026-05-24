@@ -1,0 +1,10 @@
+{
+  "name": "sport-spot-nextjs",
+  "version": "1.0.0",
+  "description": "SportSpot app: Next.js + React +  Expo",
+  "license": "ISC",
+  "author": "Bozhidar Yordanov",
+  "type": "commonjs",
+  "scripts": {
+  }
+}
