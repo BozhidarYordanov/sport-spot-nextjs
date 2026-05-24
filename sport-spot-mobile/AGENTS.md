@@ -6,6 +6,7 @@ Here we manage the React Native Expo app targeting iOS and Android. This is a cl
 - **Tech Stack**: React Native, Expo, TypeScript, NativeWind (Tailwind for React Native) or StyleSheet.
 - **Routing**: Expo Router (file-based).
 - **Data Layer**: Communicates with the backend strictly via a secure RESTful API exposed by the Next.js application. No direct database access or ORM is permitted here.
+- **Back-end API** source code: `..\sport-spot-web\src\app\api`
 - **Token Management**: JWT tokens acquired during login/register must be saved locally using `expo-secure-store`. Every request to protected API routes must inject this token into the `Authorization: Bearer <token>` header.
 
 ## Mobile Native UI/UX Guidelines
