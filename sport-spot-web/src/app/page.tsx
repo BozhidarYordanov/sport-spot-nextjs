@@ -60,8 +60,33 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-function formatSessionTime(value: Date) {
-  return `${dateFormatter.format(value)} - ${timeFormatter.format(value)}`;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function getSessionDayLabel(value: Date, now = new Date()) {
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfSession = new Date(
+    value.getFullYear(),
+    value.getMonth(),
+    value.getDate()
+  );
+  const diffDays = Math.floor(
+    (startOfSession.getTime() - startOfToday.getTime()) / MS_PER_DAY
+  );
+
+  if (diffDays <= 0) {
+    return "Today";
+  }
+
+  if (diffDays === 1) {
+    return "Tomorrow";
+  }
+
+  return dateFormatter.format(value);
+}
+
+function formatSessionTime(value: Date, now = new Date()) {
+  const dayLabel = getSessionDayLabel(value, now);
+  return `${dayLabel} - ${timeFormatter.format(value)}`;
 }
 
 function FeaturedActivityCard({ session }: { session: SessionSummary | null }) {
