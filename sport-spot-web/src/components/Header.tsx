@@ -38,9 +38,12 @@ export default function Header() {
 
           {/* Right: Auth Buttons */}
           <div className="flex items-center space-x-4">
-            <button className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200">
+            <Link
+              href="/login"
+              className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-[#1a1a1b] shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+            >
               Login
-            </button>
+            </Link>
             <Link
               href="/register"
               className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-violet-200"
