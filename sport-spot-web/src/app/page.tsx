@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, lt } from "drizzle-orm";
+import { and, asc, eq, gt, gte, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { schedule, workoutTypes } from "@/db/schema";
 
@@ -49,8 +49,9 @@ const features = [
 ];
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
+  hour: "2-digit",
   minute: "2-digit",
+  hour12: false,
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -152,8 +153,12 @@ function FeatureCard({
 export default async function Home() {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfTomorrow = new Date(startOfToday);
-  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+  const todayAt1800 = new Date(startOfToday);
+  todayAt1800.setHours(18, 0, 0, 0);
+  const tomorrowAt1800 = new Date(startOfToday);
+  tomorrowAt1800.setDate(tomorrowAt1800.getDate() + 1);
+  tomorrowAt1800.setHours(18, 0, 0, 0);
+  const eveningStart = now >= todayAt1800 ? tomorrowAt1800 : todayAt1800;
 
   const sessions = await db
     .select({
@@ -168,8 +173,10 @@ export default async function Home() {
     .innerJoin(workoutTypes, eq(schedule.workoutTypeId, workoutTypes.id))
     .where(
       and(
-        gte(schedule.startTime, startOfToday),
-        lt(schedule.startTime, startOfTomorrow)
+        gte(schedule.startTime, eveningStart),
+        gte(schedule.startTime, now),
+        lt(schedule.enrolledCount, schedule.capacity),
+        gt(schedule.capacity, schedule.enrolledCount)
       )
     )
     .orderBy(asc(schedule.startTime))
