@@ -1,4 +1,5 @@
-import { and, asc, eq, gte, inArray } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, sql } from 'drizzle-orm';
+import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 
@@ -8,6 +9,7 @@ import { verifyToken } from '@/lib/auth';
 
 type ClassDetailsPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ page?: string | string[] }>;
 };
 
 const DIFFICULTY_META: Record<
@@ -67,10 +69,16 @@ const ensureList = (value: string) => {
   return trimmed ? [trimmed] : [];
 };
 
+const normalizeParam = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] ?? '' : value ?? '';
+
 export default async function ClassDetailsPage({
   params,
+  searchParams,
 }: ClassDetailsPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const pageValue = normalizeParam(resolvedSearchParams?.page).trim();
 
   const workout = await db
     .select({
@@ -99,6 +107,24 @@ export default async function ClassDetailsPage({
   const viewer = sessionToken ? await verifyToken(sessionToken) : null;
 
   const now = new Date();
+  const sessionsPerPage = 4;
+  const totalRows = await db
+    .select({ value: sql<number>`count(*)` })
+    .from(schedule)
+    .innerJoin(workoutTypes, eq(schedule.workoutTypeId, workoutTypes.id))
+    .where(
+      and(eq(workoutTypes.id, workout.id), gte(schedule.startTime, now))
+    )
+    .then((rows) => rows[0]?.value ?? 0);
+
+  const totalSessions = Number(totalRows);
+  const totalPages = Math.max(1, Math.ceil(totalSessions / sessionsPerPage));
+  const currentPage = Math.min(
+    totalPages,
+    Math.max(1, Number(pageValue) || 1)
+  );
+  const offset = (currentPage - 1) * sessionsPerPage;
+
   const upcomingSessions = await db
     .select({
       id: schedule.id,
@@ -113,7 +139,9 @@ export default async function ClassDetailsPage({
     .where(
       and(eq(workoutTypes.id, workout.id), gte(schedule.startTime, now))
     )
-    .orderBy(asc(schedule.startTime));
+    .orderBy(asc(schedule.startTime))
+    .limit(sessionsPerPage)
+    .offset(offset);
 
   const scheduleIds = upcomingSessions.map((session) => session.id);
   const activeBookings = viewer && scheduleIds.length > 0
@@ -136,12 +164,25 @@ export default async function ClassDetailsPage({
   const filledBars = Math.min(3, Math.max(1, workout.difficultyLevel));
   const suitableForItems = ensureList(workout.suitableFor);
   const whatToBringItems = ensureList(workout.whatToBring);
+  const paginationWindow = 2;
+  const halfWindow = Math.floor(paginationWindow / 2);
+  let startPage = Math.max(1, currentPage - halfWindow);
+  const endPage = Math.min(totalPages, startPage + paginationWindow - 1);
+  startPage = Math.max(1, endPage - paginationWindow + 1);
+  const pageNumbers = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, index) => startPage + index
+  );
+  const showFirst = startPage > 1;
+  const showLast = endPage < totalPages;
+  const buildPageHref = (page: number) =>
+    page === 1 ? `/classes/${slug}` : `/classes/${slug}?page=${page}`;
 
   return (
     <div className="bg-slate-50 pb-20">
       <section className="mx-auto w-full max-w-6xl px-6 pt-10">
-        <div className="grid gap-6 lg:grid-cols-[1.65fr_0.85fr]">
-          <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,0.85fr)]">
+          <div className="min-w-0 space-y-6">
             <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-slate-900/5 shadow-xl shadow-slate-100/60">
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -237,7 +278,7 @@ export default async function ClassDetailsPage({
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50 lg:sticky lg:top-24">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
                 Upcoming Sessions
@@ -296,11 +337,86 @@ export default async function ClassDetailsPage({
                     );
                   })
                 ) : (
-                  <div className="rounded-2xl border border-slate-100 bg-white px-4 py-4 text-sm text-slate-600">
-                    No upcoming sessions yet.
+                  <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-4 text-sm text-slate-600">
+                    No upcoming sessions for this class right now.
                   </div>
                 )}
               </div>
+
+              {totalPages > 1 ? (
+                <div className="mt-5 flex items-center justify-between gap-3 text-sm">
+                  {currentPage > 1 ? (
+                    <Link
+                      href={buildPageHref(currentPage - 1)}
+                      scroll={false}
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                    >
+                      Prev
+                    </Link>
+                  ) : (
+                    <span className="rounded-full border border-slate-100 bg-slate-50 px-3 py-1.5 font-semibold text-slate-400">
+                      Prev
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    {showFirst ? (
+                      <>
+                        <Link
+                          href={buildPageHref(1)}
+                          scroll={false}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                        >
+                          1
+                        </Link>
+                        <span className="text-slate-400">...</span>
+                      </>
+                    ) : null}
+
+                    {pageNumbers.map((page) => (
+                      <Link
+                        key={`session-page-${page}`}
+                        href={buildPageHref(page)}
+                        scroll={false}
+                        className={`rounded-full border px-3 py-1.5 font-semibold transition ${
+                          page === currentPage
+                            ? 'border-slate-900 bg-slate-900 text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                        }`}
+                      >
+                        {page}
+                      </Link>
+                    ))}
+
+                    {showLast ? (
+                      <>
+                        <span className="text-slate-400">...</span>
+                        <Link
+                          href={buildPageHref(totalPages)}
+                          scroll={false}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                        >
+                          {totalPages}
+                        </Link>
+                      </>
+                    ) : null}
+                  </div>
+
+                  {currentPage < totalPages ? (
+                    <Link
+                      href={buildPageHref(currentPage + 1)}
+                      scroll={false}
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                    >
+                      Next
+                    </Link>
+                  ) : (
+                    <span className="rounded-full border border-slate-100 bg-slate-50 px-3 py-1.5 font-semibold text-slate-400">
+                      Next
+                    </span>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
