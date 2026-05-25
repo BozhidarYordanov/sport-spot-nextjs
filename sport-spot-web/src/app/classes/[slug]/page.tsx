@@ -164,7 +164,7 @@ export default async function ClassDetailsPage({
   const filledBars = Math.min(3, Math.max(1, workout.difficultyLevel));
   const suitableForItems = ensureList(workout.suitableFor);
   const whatToBringItems = ensureList(workout.whatToBring);
-  const paginationWindow = 2;
+  const paginationWindow = 3;
   const halfWindow = Math.floor(paginationWindow / 2);
   let startPage = Math.max(1, currentPage - halfWindow);
   const endPage = Math.min(totalPages, startPage + paginationWindow - 1);
@@ -181,8 +181,8 @@ export default async function ClassDetailsPage({
   return (
     <div className="bg-slate-50 pb-20">
       <section className="mx-auto w-full max-w-6xl px-6 pt-10">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,0.85fr)]">
-          <div className="min-w-0 space-y-6">
+        <div className="space-y-8">
+          <div className="space-y-6">
             <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-slate-900/5 shadow-xl shadow-slate-100/60">
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -278,8 +278,7 @@ export default async function ClassDetailsPage({
             </div>
           </div>
 
-          <div className="min-w-0 space-y-6">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50 lg:sticky lg:top-24">
+          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
                 Upcoming Sessions
               </p>
@@ -304,9 +303,9 @@ export default async function ClassDetailsPage({
                 </span>
               </div>
 
-              <div className="mt-6 space-y-4">
-                {upcomingSessions.length > 0 ? (
-                  upcomingSessions.map((session) => {
+              {upcomingSessions.length > 0 ? (
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {upcomingSessions.map((session) => {
                     const availability = Math.max(
                       0,
                       session.capacity - session.enrolledCount
@@ -319,7 +318,7 @@ export default async function ClassDetailsPage({
                     return (
                       <div
                         key={session.id}
-                        className="rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                        className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                       >
                         <p className="text-sm font-semibold text-slate-900">
                           {formatSessionDateTime(session.startTime)}
@@ -335,13 +334,13 @@ export default async function ClassDetailsPage({
                         </button>
                       </div>
                     );
-                  })
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-4 text-sm text-slate-600">
-                    No upcoming sessions for this class right now.
-                  </div>
-                )}
-              </div>
+                  })}
+                </div>
+              ) : (
+                <div className="mt-6 rounded-2xl border border-dashed border-sky-200 bg-sky-50/40 px-4 py-4 text-sm text-slate-600">
+                  No upcoming sessions for this class right now.
+                </div>
+              )}
 
               {totalPages > 1 ? (
                 <div className="mt-5 flex items-center justify-between gap-3 text-sm">
@@ -417,7 +416,6 @@ export default async function ClassDetailsPage({
                   )}
                 </div>
               ) : null}
-            </div>
           </div>
         </div>
       </section>
