@@ -1,4 +1,5 @@
 import { and, asc, ilike, inArray, sql } from 'drizzle-orm';
+import Link from 'next/link';
 import type { SQL } from 'drizzle-orm';
 
 import { db } from '@/db';
@@ -89,6 +90,7 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
     db
       .select({
         id: workoutTypes.id,
+        slug: workoutTypes.slug,
         title: workoutTypes.title,
         description: workoutTypes.description,
         category: workoutTypes.category,
@@ -158,9 +160,10 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
               );
 
               return (
-                <div
+                <Link
                   key={workout.id}
-                  className="flex h-full flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  href={`/classes/${workout.slug}`}
+                  className="group flex h-full cursor-pointer flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -189,7 +192,7 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
                     </span>
                     {meta.label}
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
