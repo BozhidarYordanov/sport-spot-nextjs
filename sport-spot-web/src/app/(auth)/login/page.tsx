@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+
+import { loginUserAction } from "../actions";
 
 const baseInputClassName =
   "w-full rounded-2xl border bg-slate-50/60 px-4 pb-3 pt-7 text-sm font-medium text-slate-900 shadow-sm transition placeholder:text-transparent focus:outline-none";
@@ -41,6 +44,9 @@ function isEmailValid(value: string) {
 export default function LoginPage() {
   const [values, setValues] = useState({ email: "", password: "" });
   const [touched, setTouched] = useState({ email: false, password: false });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const emailValue = values.email.trim();
   const errors = {
@@ -58,6 +64,27 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTouched({ email: true, password: true });
+    setErrorMessage(null);
+
+    if (errors.email || errors.password) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(() => {
+      void (async () => {
+        const result = await loginUserAction(formData);
+
+        if ("error" in result) {
+          setErrorMessage(result.error);
+          return;
+        }
+
+        router.push("/");
+        router.refresh();
+      })();
+    });
   };
 
   return (
@@ -82,6 +109,12 @@ export default function LoginPage() {
             onSubmit={handleSubmit}
             noValidate
           >
+            {errorMessage ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm font-medium text-rose-600 shadow-sm">
+                {errorMessage}
+              </div>
+            ) : null}
+
             <div className="space-y-1">
               <div className="relative">
                 <label htmlFor="email" className={labelClassName}>
@@ -89,6 +122,7 @@ export default function LoginPage() {
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   autoComplete="email"
                   placeholder="Email address"
@@ -128,6 +162,7 @@ export default function LoginPage() {
                 </label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   autoComplete="current-password"
                   placeholder="Password"
@@ -164,9 +199,11 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="mt-2 w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+              disabled={isPending}
+              aria-busy={isPending}
+              className="mt-2 w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
             >
-              Sign In
+              {isPending ? "Signing in..." : "Sign In"}
             </button>
           </form>
 

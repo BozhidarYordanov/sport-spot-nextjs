@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+
+import { registerUserAction } from "../actions";
 
 const baseInputClassName =
   "w-full rounded-2xl border bg-slate-50/60 px-4 pb-3 pt-7 text-sm font-medium text-slate-900 shadow-sm transition placeholder:text-transparent focus:outline-none";
@@ -112,6 +115,9 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const emailValue = values.email.trim();
   const errors = {
@@ -140,6 +146,37 @@ export default function RegisterPage() {
       password: true,
       confirmPassword: true,
     });
+    setErrorMessage(null);
+
+    const hasFieldErrors = Object.values(errors).some((value) => Boolean(value));
+    if (hasFieldErrors) {
+      return;
+    }
+
+    if (
+      values.password.trim() &&
+      values.confirmPassword.trim() &&
+      values.password !== values.confirmPassword
+    ) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(() => {
+      void (async () => {
+        const result = await registerUserAction(formData);
+
+        if ("error" in result) {
+          setErrorMessage(result.error);
+          return;
+        }
+
+        router.push("/");
+        router.refresh();
+      })();
+    });
   };
 
   return (
@@ -164,6 +201,12 @@ export default function RegisterPage() {
             onSubmit={handleSubmit}
             noValidate
           >
+            {errorMessage ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm font-medium text-rose-600 shadow-sm">
+                {errorMessage}
+              </div>
+            ) : null}
+
             <div className="space-y-1">
               <div className="relative">
                 <label htmlFor="full-name" className={labelClassName}>
@@ -171,6 +214,7 @@ export default function RegisterPage() {
                 </label>
                 <input
                   id="full-name"
+                  name="fullName"
                   type="text"
                   autoComplete="name"
                   placeholder="Full Name"
@@ -212,6 +256,7 @@ export default function RegisterPage() {
                 </label>
                 <input
                   id="register-email"
+                  name="email"
                   type="email"
                   autoComplete="email"
                   placeholder="Email address"
@@ -253,6 +298,7 @@ export default function RegisterPage() {
                 </label>
                 <input
                   id="phone"
+                  name="phone"
                   type="tel"
                   autoComplete="tel"
                   placeholder="Phone Number"
@@ -294,6 +340,7 @@ export default function RegisterPage() {
                 </label>
                 <input
                   id="register-password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Password"
@@ -347,6 +394,7 @@ export default function RegisterPage() {
                 </label>
                 <input
                   id="confirm-password"
+                  name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Confirm Password"
@@ -401,9 +449,11 @@ export default function RegisterPage() {
               <div className="border-t border-slate-100 pt-6">
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                  disabled={isPending}
+                  aria-busy={isPending}
+                  className="w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  Create Account
+                  {isPending ? "Creating account..." : "Create Account"}
                 </button>
               </div>
             </div>
