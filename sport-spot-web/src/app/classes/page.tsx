@@ -1,0 +1,200 @@
+import { and, asc, ilike, inArray, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
+
+import { db } from '@/db';
+import { workoutTypes } from '@/db/schema';
+import EmptyState from './EmptyState';
+import FiltersClient from './FiltersClient';
+
+const CATEGORY_OPTIONS = [
+  'Cardio',
+  'Strength',
+  'Mind & Body',
+  'Combat',
+] as const;
+
+const DIFFICULTY_OPTIONS = [
+  { label: 'Easy', value: '1' },
+  { label: 'Intermediate', value: '2' },
+  { label: 'Advanced', value: '3' },
+] as const;
+
+const DIFFICULTY_META: Record<
+  number,
+  { label: string; badgeClass: string }
+> = {
+  1: { label: 'Easy', badgeClass: 'bg-emerald-50 text-emerald-700' },
+  2: { label: 'Intermediate', badgeClass: 'bg-amber-50 text-amber-700' },
+  3: { label: 'Advanced', badgeClass: 'bg-rose-50 text-rose-700' },
+};
+
+type ClassesSearchParams = {
+  search?: string | string[];
+  category?: string | string[];
+  difficulty?: string | string[];
+};
+
+type ClassesPageProps = {
+  searchParams?: Promise<ClassesSearchParams>;
+};
+
+const normalizeParam = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] ?? '' : value ?? '';
+
+const normalizeParamArray = (value?: string | string[]) =>
+  Array.isArray(value) ? value : value ? [value] : [];
+
+const isCategory = (value: string) =>
+  CATEGORY_OPTIONS.includes(value as (typeof CATEGORY_OPTIONS)[number]);
+
+const isDifficulty = (value: string) =>
+  DIFFICULTY_OPTIONS.some((option) => option.value === value);
+
+export default async function ClassesPage({ searchParams }: ClassesPageProps) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const searchValue = normalizeParam(resolvedParams?.search).trim();
+  const categoryValues = normalizeParamArray(resolvedParams?.category)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const difficultyValues = normalizeParamArray(resolvedParams?.difficulty)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const selectedCategories = categoryValues.filter(isCategory);
+  const selectedDifficulties = difficultyValues.filter(isDifficulty);
+  const selectedDifficultyNumbers = selectedDifficulties.map((value) =>
+    Number(value)
+  );
+
+  const filters = [
+    searchValue
+      ? ilike(workoutTypes.title, `%${searchValue}%`)
+      : undefined,
+    selectedCategories.length > 0
+      ? inArray(workoutTypes.category, selectedCategories)
+      : undefined,
+    selectedDifficultyNumbers.length > 0
+      ? inArray(workoutTypes.difficultyLevel, selectedDifficultyNumbers)
+      : undefined,
+  ].filter((filter): filter is SQL => Boolean(filter));
+
+  const whereClause =
+    filters.length === 0
+      ? undefined
+      : filters.length === 1
+        ? filters[0]
+        : and(...filters);
+
+  const [workouts, totalRows] = await Promise.all([
+    db
+      .select({
+        id: workoutTypes.id,
+        title: workoutTypes.title,
+        description: workoutTypes.description,
+        category: workoutTypes.category,
+        difficultyLevel: workoutTypes.difficultyLevel,
+      })
+      .from(workoutTypes)
+      .where(whereClause)
+      .orderBy(asc(workoutTypes.title)),
+    db
+      .select({ value: sql<number>`count(*)` })
+      .from(workoutTypes)
+      .then((rows) => rows[0]?.value ?? 0),
+  ]);
+
+  const totalCount = Number(totalRows);
+
+  return (
+    <div className="bg-slate-50 pb-16">
+      <section className="mx-auto w-full max-w-6xl px-6 pt-10">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl shadow-slate-100/60">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_55%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.22),_transparent_60%),radial-gradient(circle_at_bottom_left,_rgba(129,140,248,0.18),_transparent_50%)]" />
+          <div className="absolute -top-24 -left-20 h-64 w-64 rounded-full bg-indigo-200/60 blur-3xl" />
+          <div className="absolute -bottom-24 right-0 h-64 w-64 rounded-full bg-violet-200/60 blur-3xl" />
+
+          <div className="relative px-8 py-9 sm:px-10">
+            <span className="inline-flex w-fit items-center rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
+              Class Browsing
+            </span>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              Find your next workout
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+              Use search and difficulty filters to quickly discover sessions that
+              match your pace.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto mt-6 w-full max-w-6xl px-6">
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
+          <FiltersClient
+            search={searchValue}
+            category={selectedCategories}
+            difficulty={selectedDifficulties}
+            categories={CATEGORY_OPTIONS}
+            difficulties={DIFFICULTY_OPTIONS}
+          />
+        </div>
+
+        <div className="mt-4 flex items-center justify-end text-sm text-slate-500">
+          <span>
+            {workouts.length} classes shown &#8226; {totalCount} total
+          </span>
+        </div>
+
+        {workouts.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-4">
+            {workouts.map((workout) => {
+              const meta = DIFFICULTY_META[workout.difficultyLevel] ??
+                DIFFICULTY_META[1];
+              const filledBars = Math.min(
+                3,
+                Math.max(1, workout.difficultyLevel)
+              );
+
+              return (
+                <div
+                  key={workout.id}
+                  className="flex h-full flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      {workout.category}
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-slate-900">
+                      {workout.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {workout.description}
+                    </p>
+                  </div>
+
+                  <div
+                    className={`mt-6 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${meta.badgeClass}`}
+                  >
+                    <span className="flex items-center gap-0.5">
+                      {Array.from({ length: 3 }).map((_, index) => (
+                        <span
+                          key={`difficulty-bar-${workout.id}-${index}`}
+                          className={`h-2 w-1 rounded-full ${
+                            index < filledBars ? 'bg-current' : 'bg-current/20'
+                          }`}
+                        />
+                      ))}
+                    </span>
+                    {meta.label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
