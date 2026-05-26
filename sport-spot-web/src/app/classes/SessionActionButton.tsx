@@ -15,7 +15,7 @@ type SessionActionButtonProps = {
 
 const LABELS = {
   book: {
-    idle: 'Book Session',
+    idle: 'Reserve',
     pending: 'Booking...',
   },
   cancel: {

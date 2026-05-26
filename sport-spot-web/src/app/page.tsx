@@ -140,13 +140,13 @@ function FeaturedActivityCard({
             <SessionActionButton
               scheduleId={session.scheduleId}
               variant={isBooked ? 'cancel' : 'book'}
-              labelIdle={isBooked ? 'Cancel Booking' : 'Reserve spot'}
+              labelIdle={isBooked ? 'Cancel Booking' : 'Reserve now'}
               labelPending={isBooked ? 'Cancelling...' : 'Reserving...'}
               className="mt-0"
             />
           ) : (
             <Link href="/login" className={reserveButtonClass}>
-              Reserve spot
+              Reserve now
             </Link>
           )}
         </div>

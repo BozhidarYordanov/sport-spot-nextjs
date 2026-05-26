@@ -97,6 +97,7 @@ export const bookSessionAction = async (
     }
 
     revalidatePath('/classes/[slug]');
+    revalidatePath('/schedule');
     return { success: true };
   } catch (error) {
     console.error('bookSessionAction failed', error);
@@ -140,6 +141,7 @@ export const cancelBookingAction = async (
       .where(eq(schedule.id, scheduleId));
 
     revalidatePath('/classes/[slug]');
+    revalidatePath('/schedule');
     return { success: true };
   } catch (error) {
     console.error('cancelBookingAction failed', error);
