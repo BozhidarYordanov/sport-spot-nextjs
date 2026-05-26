@@ -7,11 +7,20 @@ const isAuthRoute = (pathname: string) =>
   pathname === "/register" ||
   pathname.startsWith("/register/");
 
+const isPublicContentRoute = (pathname: string) =>
+  pathname === "/classes" ||
+  pathname.startsWith("/classes/") ||
+  pathname === "/schedule" ||
+  pathname.startsWith("/schedule/");
+
 export const middleware = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   const sessionToken = request.cookies.get("session")?.value;
 
-  const isPublicRoute = pathname === "/" || isAuthRoute(pathname);
+  const isPublicRoute =
+    pathname === "/" ||
+    isAuthRoute(pathname) ||
+    isPublicContentRoute(pathname);
 
   if (!sessionToken && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", request.url));

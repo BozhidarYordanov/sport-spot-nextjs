@@ -61,20 +61,20 @@ export default function HeaderClient({
             >
               Home
             </Link>
+            <Link
+              href="/classes"
+              className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
+            >
+              Classes
+            </Link>
+            <Link
+              href="/schedule"
+              className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
+            >
+              Schedule
+            </Link>
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/classes"
-                  className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Classes
-                </Link>
-                <Link
-                  href="/schedule"
-                  className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Schedule
-                </Link>
                 <Link
                   href="/dashboard"
                   className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
@@ -168,14 +168,14 @@ export default function HeaderClient({
               <Link href="/" onClick={closeMobileMenu}>
                 Home
               </Link>
+              <Link href="/classes" onClick={closeMobileMenu}>
+                Classes
+              </Link>
+              <Link href="/schedule" onClick={closeMobileMenu}>
+                Schedule
+              </Link>
               {isAuthenticated ? (
                 <>
-                  <Link href="/classes" onClick={closeMobileMenu}>
-                    Classes
-                  </Link>
-                  <Link href="/schedule" onClick={closeMobileMenu}>
-                    Schedule
-                  </Link>
                   <Link href="/dashboard" onClick={closeMobileMenu}>
                     Dashboard
                   </Link>
