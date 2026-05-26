@@ -9,11 +9,37 @@ import { logoutUserAction } from '@/app/(auth)/actions';
 type HeaderClientProps = {
   userName: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 };
+
+const navLinkClass =
+  'px-2 py-1 text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-2 after:right-2 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-[calc(100%-1rem)]';
+
+const adminLinkClass =
+  'border border-violet-200 text-violet-700 bg-violet-50/50 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-violet-100 transition-all';
+
+function AdminShieldIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3.5 w-3.5"
+    >
+      <path d="M12 3.5 18.5 6v5.2c0 4.1-2.6 7.8-6.5 9.3-3.9-1.5-6.5-5.2-6.5-9.3V6L12 3.5Z" />
+      <path d="M9.8 12.1 11.2 13.5l3.2-3.4" />
+    </svg>
+  );
+}
 
 export default function HeaderClient({
   userName,
   isAuthenticated,
+  isAdmin,
 }: HeaderClientProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -53,70 +79,62 @@ export default function HeaderClient({
             </Link>
           </div>
 
-          {/* Center: Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-            >
-              Home
-            </Link>
-            <Link
-              href="/classes"
-              className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-            >
-              Classes
-            </Link>
-            <Link
-              href="/schedule"
-              className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-            >
-              Schedule
-            </Link>
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="text-slate-700 font-medium text-sm hover:text-slate-900 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-600 after:to-indigo-600 after:transition-all after:duration-300 hover:after:w-full"
-                >
+          <div className="ml-auto hidden items-center gap-6 md:flex">
+            <nav className="flex items-center gap-5">
+              <Link href="/" className={navLinkClass}>
+                Home
+              </Link>
+              <Link href="/classes" className={navLinkClass}>
+                Classes
+              </Link>
+              <Link href="/schedule" className={navLinkClass}>
+                Schedule
+              </Link>
+              {isAuthenticated ? (
+                <Link href="/dashboard" className={navLinkClass}>
                   Dashboard
                 </Link>
-              </>
-            ) : null}
-          </nav>
+              ) : null}
+              {isAdmin ? (
+                <Link href="/admin" className={adminLinkClass}>
+                  <AdminShieldIcon />
+                  Admin
+                </Link>
+              ) : null}
+            </nav>
 
-          {/* Right: Auth Buttons */}
-          {isAuthenticated ? (
-            <div className="hidden md:flex items-center space-x-4">
-              <span className="text-sm font-semibold text-slate-600">
-                Hi, {firstName}!
-              </span>
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={isPending}
-                aria-busy={isPending}
-                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
-              >
-                {isPending ? 'Logging out...' : 'Logout'}
-              </button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-semibold text-slate-600">
+                  Hi, {firstName}!
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={isPending}
+                  aria-busy={isPending}
+                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {isPending ? 'Logging out...' : 'Logout'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/login"
+                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -179,6 +197,16 @@ export default function HeaderClient({
                   <Link href="/dashboard" onClick={closeMobileMenu}>
                     Dashboard
                   </Link>
+                  {isAdmin ? (
+                    <Link
+                      href="/admin"
+                      onClick={closeMobileMenu}
+                      className={adminLinkClass}
+                    >
+                      <AdminShieldIcon />
+                      Admin
+                    </Link>
+                  ) : null}
                 </>
               ) : null}
             </nav>
@@ -196,7 +224,7 @@ export default function HeaderClient({
                     }}
                     disabled={isPending}
                     aria-busy={isPending}
-                    className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    className="w-full cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                   >
                     {isPending ? 'Logging out...' : 'Logout'}
                   </button>
