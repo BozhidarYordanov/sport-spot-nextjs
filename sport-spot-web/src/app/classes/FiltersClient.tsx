@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 type DifficultyOption = {
   label: string;
@@ -28,10 +28,6 @@ export default function FiltersClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [searchValue, setSearchValue] = useState(search);
-
-  useEffect(() => {
-    setSearchValue(search);
-  }, [search]);
 
   const applyParams = (nextParams: URLSearchParams) => {
     const query = nextParams.toString();
@@ -75,8 +71,9 @@ export default function FiltersClient({
   const basePillClass =
     'cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-200';
   const inactivePillClass =
-    'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900';
-  const activePillClass = 'border-slate-900 bg-slate-900 text-white shadow-sm';
+    'border-slate-200 bg-white text-slate-600 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700';
+  const activePillClass =
+    'border-transparent bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-200';
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">

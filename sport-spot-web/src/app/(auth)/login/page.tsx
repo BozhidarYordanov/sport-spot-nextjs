@@ -88,13 +88,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-12">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_55%),radial-gradient(circle_at_bottom_right,_rgba(167,139,250,0.22),_transparent_60%),radial-gradient(circle_at_left,_rgba(255,255,255,0.9),_transparent_70%)]" />
-      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
-      <div className="absolute -bottom-28 right-0 h-80 w-80 rounded-full bg-violet-200/40 blur-3xl" />
-
-      <div className="relative w-full max-w-md">
-        <div className="rounded-[2.5rem] bg-white px-8 py-10 shadow-2xl shadow-indigo-100/50 sm:px-10">
+    <div className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-12 sm:px-6">
+      <div className="w-full max-w-md rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.24),_transparent_36%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.22),_transparent_42%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_45%,_#faf5ff_100%)] p-4 shadow-xl shadow-slate-200/70 sm:p-8">
+        <div className="rounded-3xl border border-white/70 bg-white/88 px-8 py-10 shadow-sm backdrop-blur sm:px-10">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Welcome Back
@@ -201,7 +197,7 @@ export default function LoginPage() {
               type="submit"
               disabled={isPending}
               aria-busy={isPending}
-              className="mt-2 w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+              className="mt-2 w-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
             >
               {isPending ? "Signing in..." : "Sign In"}
             </button>

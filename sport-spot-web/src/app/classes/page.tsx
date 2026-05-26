@@ -109,14 +109,10 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
 
   return (
     <div className="bg-slate-50 pb-16">
-      <section className="mx-auto w-full max-w-6xl px-6 pt-10">
-        <div className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl shadow-slate-100/60">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_55%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.22),_transparent_60%),radial-gradient(circle_at_bottom_left,_rgba(129,140,248,0.18),_transparent_50%)]" />
-          <div className="absolute -top-24 -left-20 h-64 w-64 rounded-full bg-indigo-200/60 blur-3xl" />
-          <div className="absolute -bottom-24 right-0 h-64 w-64 rounded-full bg-violet-200/60 blur-3xl" />
-
-          <div className="relative px-8 py-9 sm:px-10">
-            <span className="inline-flex w-fit items-center rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
+      <main className="mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6 lg:px-10">
+        <div className="rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.24),_transparent_36%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.22),_transparent_42%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_45%,_#faf5ff_100%)] p-4 shadow-xl shadow-slate-200/70 sm:p-8">
+          <section className="rounded-3xl border border-white/70 bg-white/78 px-8 py-10 shadow-sm backdrop-blur sm:px-10">
+            <span className="inline-flex w-fit items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-600">
               Class Browsing
             </span>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -126,12 +122,10 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
               Use search and difficulty filters to quickly discover sessions that
               match your pace.
             </p>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section className="mx-auto mt-6 w-full max-w-6xl px-6">
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
+      <section className="mt-5">
+        <div className="rounded-3xl border border-white/70 bg-white/88 p-5 shadow-sm backdrop-blur sm:p-6">
           <FiltersClient
             search={searchValue}
             category={selectedCategories}
@@ -150,7 +144,7 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
         {workouts.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-4">
             {workouts.map((workout) => {
               const meta = DIFFICULTY_META[workout.difficultyLevel] ??
                 DIFFICULTY_META[1];
@@ -163,10 +157,10 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
                 <Link
                   key={workout.id}
                   href={`/classes/${workout.slug}`}
-                  className="group flex h-full cursor-pointer flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group flex h-full cursor-pointer flex-col justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                       {workout.category}
                     </p>
                     <h3 className="mt-2 text-lg font-semibold text-slate-900">
@@ -198,6 +192,8 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
           </div>
         )}
       </section>
+        </div>
+      </main>
     </div>
   );
 }

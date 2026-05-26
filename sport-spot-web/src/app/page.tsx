@@ -105,7 +105,7 @@ function FeaturedActivityCard({
   isBooked: boolean;
 }) {
   const reserveButtonClass =
-    "w-fit cursor-pointer rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl";
+    "w-fit cursor-pointer rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl";
 
   return (
     <div className="rounded-2xl border border-white/70 bg-white/70 p-6 shadow-xl shadow-slate-100/50 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -123,7 +123,7 @@ function FeaturedActivityCard({
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white/80 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Trainer
             </p>
             <p className="text-sm font-semibold text-slate-900">
@@ -160,7 +160,7 @@ function FeaturedActivityCard({
           </p>
           <Link
             href="/classes"
-            className="mt-2 cursor-pointer rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
+            className="mt-2 cursor-pointer rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
           >
             Browse classes
           </Link>
@@ -173,7 +173,7 @@ function FeaturedActivityCard({
 function TestimonialCard({ quote, name }: { quote: string; name: string }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <p className="text-sm text-slate-600">"{quote}"</p>
+      <p className="text-sm text-slate-600">&ldquo;{quote}&rdquo;</p>
       <p className="mt-3 text-sm font-semibold text-slate-950">{name}</p>
     </div>
   );
@@ -282,14 +282,14 @@ export default async function Home() {
                 {!isAuthenticated ? (
                   <Link
                     href="/login"
-                    className="cursor-pointer rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
+                    className="cursor-pointer rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     Get Started
                   </Link>
                 ) : null}
                 <Link
                   href="/classes"
-                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-[#1a1a1b] shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
                 >
                   Browse Classes
                 </Link>
@@ -309,7 +309,7 @@ export default async function Home() {
         <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-100/50">
           <div className="grid items-start gap-6 lg:grid-cols-[1fr_2fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Social Proof
               </p>
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">

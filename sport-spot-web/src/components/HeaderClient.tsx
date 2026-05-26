@@ -96,7 +96,7 @@ export default function HeaderClient({
                 onClick={handleLogout}
                 disabled={isPending}
                 aria-busy={isPending}
-                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {isPending ? 'Logging out...' : 'Logout'}
               </button>
@@ -105,13 +105,13 @@ export default function HeaderClient({
             <div className="hidden md:flex items-center space-x-4">
               <Link
                 href="/login"
-                className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-[#1a1a1b] shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-violet-200"
+                className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
               >
                 Register
               </Link>
@@ -196,7 +196,7 @@ export default function HeaderClient({
                     }}
                     disabled={isPending}
                     aria-busy={isPending}
-                    className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                    className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                   >
                     {isPending ? 'Logging out...' : 'Logout'}
                   </button>
@@ -206,14 +206,14 @@ export default function HeaderClient({
                   <Link
                     href="/login"
                     onClick={closeMobileMenu}
-                    className="flex-1 cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-[#1a1a1b] shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                    className="flex-1 cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
                     onClick={closeMobileMenu}
-                    className="flex-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                    className="flex-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     Register
                   </Link>

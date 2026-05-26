@@ -192,7 +192,7 @@ export default async function ClassDetailsPage({
               />
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-900/35 to-transparent" />
               <div className="relative px-8 py-10 sm:px-10">
-                <span className="inline-flex w-fit items-center rounded-full border border-white/50 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white/80">
+                <span className="inline-flex w-fit items-center rounded-full border border-white/50 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
                   Class Details
                 </span>
                 <h1 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -205,7 +205,7 @@ export default async function ClassDetailsPage({
             </div>
 
             <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 What is this workout?
               </p>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 whitespace-pre-line">
@@ -215,7 +215,7 @@ export default async function ClassDetailsPage({
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Suitable For
                 </p>
                 <div className="mt-4 space-y-3">
@@ -247,7 +247,7 @@ export default async function ClassDetailsPage({
               </div>
 
               <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   What to Bring
                 </p>
                 <div className="mt-4 space-y-3">
@@ -281,7 +281,7 @@ export default async function ClassDetailsPage({
           </div>
 
           <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-100/50">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
                 Upcoming Sessions
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -356,7 +356,7 @@ export default async function ClassDetailsPage({
                     <Link
                       href={buildPageHref(currentPage - 1)}
                       scroll={false}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                     >
                       Prev
                     </Link>
@@ -372,7 +372,7 @@ export default async function ClassDetailsPage({
                         <Link
                           href={buildPageHref(1)}
                           scroll={false}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                         >
                           1
                         </Link>
@@ -387,8 +387,8 @@ export default async function ClassDetailsPage({
                         scroll={false}
                         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
                           page === currentPage
-                            ? 'border-slate-900 bg-slate-900 text-white'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                            ? 'border-transparent bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-200'
+                            : 'border-slate-200 bg-white text-slate-600 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700'
                         }`}
                       >
                         {page}
@@ -401,7 +401,7 @@ export default async function ClassDetailsPage({
                         <Link
                           href={buildPageHref(totalPages)}
                           scroll={false}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                         >
                           {totalPages}
                         </Link>
@@ -413,7 +413,7 @@ export default async function ClassDetailsPage({
                     <Link
                       href={buildPageHref(currentPage + 1)}
                       scroll={false}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                     >
                       Next
                     </Link>
