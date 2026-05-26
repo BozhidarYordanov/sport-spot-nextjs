@@ -1,8 +1,14 @@
 import { and, asc, eq, gt, gte, lt } from "drizzle-orm";
+import Link from "next/link";
+import { cookies } from "next/headers";
+
+import SessionActionButton from "@/app/classes/SessionActionButton";
 import { db } from "@/db";
-import { schedule, workoutTypes } from "@/db/schema";
+import { bookings, schedule, workoutTypes } from "@/db/schema";
+import { verifyToken } from "@/lib/auth";
 
 type SessionSummary = {
+  scheduleId: number;
   workoutTitle: string;
   startTime: Date;
   trainerName: string;
@@ -89,7 +95,18 @@ function formatSessionTime(value: Date, now = new Date()) {
   return `${dayLabel} - ${timeFormatter.format(value)}`;
 }
 
-function FeaturedActivityCard({ session }: { session: SessionSummary | null }) {
+function FeaturedActivityCard({
+  session,
+  isAuthenticated,
+  isBooked,
+}: {
+  session: SessionSummary | null;
+  isAuthenticated: boolean;
+  isBooked: boolean;
+}) {
+  const reserveButtonClass =
+    "w-fit cursor-pointer rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl";
+
   return (
     <div className="rounded-2xl border border-white/70 bg-white/70 p-6 shadow-xl shadow-slate-100/50 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
       <p className="text-xs font-semibold tracking-[0.25em] text-slate-500">
@@ -119,12 +136,19 @@ function FeaturedActivityCard({ session }: { session: SessionSummary | null }) {
             </span>
             <span className="font-semibold text-indigo-600">Room {session.room}</span>
           </div>
-          <button
-            type="button"
-            className="w-full cursor-pointer rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
-          >
-            Reserve spot
-          </button>
+          {isAuthenticated ? (
+            <SessionActionButton
+              scheduleId={session.scheduleId}
+              variant={isBooked ? 'cancel' : 'book'}
+              labelIdle={isBooked ? 'Cancel Booking' : 'Reserve spot'}
+              labelPending={isBooked ? 'Cancelling...' : 'Reserving...'}
+              className="mt-0"
+            />
+          ) : (
+            <Link href="/login" className={reserveButtonClass}>
+              Reserve spot
+            </Link>
+          )}
         </div>
       ) : (
         <div className="mt-4 space-y-3">
@@ -134,12 +158,12 @@ function FeaturedActivityCard({ session }: { session: SessionSummary | null }) {
           <p className="text-sm text-slate-600">
             Check back soon for the next available class.
           </p>
-          <button
-            type="button"
+          <Link
+            href="/classes"
             className="mt-2 cursor-pointer rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
           >
             Browse classes
-          </button>
+          </Link>
         </div>
       )}
     </div>
@@ -176,6 +200,11 @@ function FeatureCard({
 }
 
 export default async function Home() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session")?.value;
+  const viewer = sessionToken ? await verifyToken(sessionToken) : null;
+  const isAuthenticated = Boolean(viewer);
+
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayAt1800 = new Date(startOfToday);
@@ -187,6 +216,7 @@ export default async function Home() {
 
   const sessions = await db
     .select({
+      scheduleId: schedule.id,
       workoutTitle: workoutTypes.title,
       startTime: schedule.startTime,
       trainerName: schedule.trainerName,
@@ -208,6 +238,22 @@ export default async function Home() {
     .limit(1);
 
   const nextSession = sessions[0] ?? null;
+  const isNextSessionBooked =
+    viewer && nextSession
+      ? (
+          await db
+            .select({ id: bookings.id })
+            .from(bookings)
+            .where(
+              and(
+                eq(bookings.status, 'active'),
+                eq(bookings.userId, viewer.id),
+                eq(bookings.scheduleId, nextSession.scheduleId)
+              )
+            )
+            .limit(1)
+        ).length > 0
+      : false;
 
   return (
     <div className="bg-slate-50 pb-20">
@@ -233,22 +279,28 @@ export default async function Home() {
                 designed for your healthiest routine.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className="cursor-pointer rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
-                >
-                  Get Started
-                </button>
-                <button
-                  type="button"
+                {!isAuthenticated ? (
+                  <Link
+                    href="/login"
+                    className="cursor-pointer rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-2xl"
+                  >
+                    Get Started
+                  </Link>
+                ) : null}
+                <Link
+                  href="/classes"
                   className="cursor-pointer rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-[#1a1a1b] shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
                 >
                   Browse Classes
-                </button>
+                </Link>
               </div>
             </div>
 
-            <FeaturedActivityCard session={nextSession} />
+            <FeaturedActivityCard
+              session={nextSession}
+              isAuthenticated={isAuthenticated}
+              isBooked={isNextSessionBooked}
+            />
           </div>
         </div>
       </section>

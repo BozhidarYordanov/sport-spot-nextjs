@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { bookSessionAction, cancelBookingAction } from '@/app/classes/actions';
@@ -7,6 +8,8 @@ import { bookSessionAction, cancelBookingAction } from '@/app/classes/actions';
 type SessionActionButtonProps = {
   scheduleId: number;
   variant: 'book' | 'cancel';
+  labelIdle?: string;
+  labelPending?: string;
   className?: string;
 };
 
@@ -22,7 +25,7 @@ const LABELS = {
 } as const;
 
 const BASE_CLASS =
-  'mt-4 w-full rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300';
+  'mt-4 w-fit rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300';
 
 const VARIANT_CLASS = {
   book:
@@ -34,12 +37,17 @@ const VARIANT_CLASS = {
 export default function SessionActionButton({
   scheduleId,
   variant,
+  labelIdle,
+  labelPending,
   className,
 }: SessionActionButtonProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isBusy = isPending || isSubmitting;
-  const label = isBusy ? LABELS[variant].pending : LABELS[variant].idle;
+  const label = isBusy
+    ? labelPending ?? LABELS[variant].pending
+    : labelIdle ?? LABELS[variant].idle;
   const pendingClass = isBusy
     ? 'cursor-not-allowed opacity-70'
     : 'cursor-pointer';
@@ -54,12 +62,19 @@ export default function SessionActionButton({
 
   const handleClick = () => {
     setIsSubmitting(true);
-    startTransition(() => {
-      const action =
-        variant === 'book'
-          ? bookSessionAction(scheduleId)
-          : cancelBookingAction(scheduleId);
-      void action.finally(() => setIsSubmitting(false));
+    startTransition(async () => {
+      try {
+        const result =
+          variant === 'book'
+            ? await bookSessionAction(scheduleId)
+            : await cancelBookingAction(scheduleId);
+
+        if ('success' in result) {
+          router.refresh();
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
     });
   };
 

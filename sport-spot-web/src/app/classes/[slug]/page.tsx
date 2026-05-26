@@ -313,13 +313,13 @@ export default async function ClassDetailsPage({
                       session.capacity - session.enrolledCount
                     );
                     const isBooked = bookedScheduleIds.has(session.id);
-                    const loginButtonClass =
-                      'mt-4 w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900';
+                    const guestButtonClass =
+                      'mt-4 w-fit cursor-pointer rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl';
 
                     return (
                       <div
                         key={session.id}
-                        className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                        className="flex h-full w-full flex-col rounded-2xl border border-slate-100 bg-white px-4 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                       >
                         <p className="text-sm font-semibold text-slate-900">
                           {formatSessionDateTime(session.startTime)}
@@ -336,8 +336,8 @@ export default async function ClassDetailsPage({
                             variant={isBooked ? 'cancel' : 'book'}
                           />
                         ) : (
-                          <Link href="/login" className={loginButtonClass}>
-                            Log in to Book
+                          <Link href="/login" className={guestButtonClass}>
+                            Book Session
                           </Link>
                         )}
                       </div>
