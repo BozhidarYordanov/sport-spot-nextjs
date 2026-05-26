@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 
+import SessionActionButton from '@/app/classes/SessionActionButton';
 import { db } from '@/db';
 import { bookings, schedule, workoutTypes } from '@/db/schema';
 import { verifyToken } from '@/lib/auth';
@@ -177,6 +178,7 @@ export default async function ClassDetailsPage({
   const showLast = endPage < totalPages;
   const buildPageHref = (page: number) =>
     page === 1 ? `/classes/${slug}` : `/classes/${slug}?page=${page}`;
+  const isLoggedIn = Boolean(viewer);
 
   return (
     <div className="bg-slate-50 pb-20">
@@ -311,9 +313,8 @@ export default async function ClassDetailsPage({
                       session.capacity - session.enrolledCount
                     );
                     const isBooked = bookedScheduleIds.has(session.id);
-                    const buttonClass = isBooked
-                      ? 'mt-4 w-full cursor-pointer rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-100'
-                      : 'mt-4 w-full cursor-pointer rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl';
+                    const loginButtonClass =
+                      'mt-4 w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900';
 
                     return (
                       <div
@@ -329,9 +330,16 @@ export default async function ClassDetailsPage({
                         <p className="mt-3 text-sm font-semibold text-emerald-600">
                           {availability} spots available
                         </p>
-                        <button type="button" className={buttonClass}>
-                          {isBooked ? 'Cancel Booking' : 'Reserve'}
-                        </button>
+                        {isLoggedIn ? (
+                          <SessionActionButton
+                            scheduleId={session.id}
+                            variant={isBooked ? 'cancel' : 'book'}
+                          />
+                        ) : (
+                          <Link href="/login" className={loginButtonClass}>
+                            Log in to Book
+                          </Link>
+                        )}
                       </div>
                     );
                   })}
