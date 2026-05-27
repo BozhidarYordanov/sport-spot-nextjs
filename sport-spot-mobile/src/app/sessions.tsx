@@ -70,7 +70,7 @@ function getBadgeColor(category: string) {
 }
 
 export default function SessionsScreen() {
-  const { token } = useAuth();
+  const { token, user, isLoading: isAuthLoading } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -212,6 +212,35 @@ export default function SessionsScreen() {
       </View>
     );
   }, [errorMessage, isLoading, sessions.length]);
+
+  if (isAuthLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.lockedState}>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!token || !user) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.lockedState}>
+          <View style={styles.lockBadge}>
+            <Text style={styles.lockIcon}>Lock</Text>
+          </View>
+          <Text style={styles.lockedTitle}>Access the Schedule</Text>
+          <Text style={styles.lockedBody}>
+            Sign in to view available fitness classes, track capacities, and secure your training spots.
+          </Text>
+          <TouchableOpacity activeOpacity={0.86} style={styles.signInButton} onPress={() => router.push('/login')}>
+            <Text style={styles.signInButtonText}>Sign In Now</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -386,5 +415,65 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     paddingVertical: 18,
+  },
+  lockedState: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 28,
+  },
+  lockBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.cardSoft,
+    borderColor: '#e9d5ff',
+    borderRadius: 28,
+    borderWidth: 1,
+    height: 76,
+    justifyContent: 'center',
+    marginBottom: 22,
+    shadowColor: colors.primaryDeep,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 22,
+    width: 76,
+  },
+  lockIcon: {
+    color: colors.primaryDeep,
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  lockedTitle: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 0,
+    lineHeight: 34,
+    textAlign: 'center',
+  },
+  lockedBody: {
+    color: colors.textMuted,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 10,
+    maxWidth: 340,
+    textAlign: 'center',
+  },
+  signInButton: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 18,
+    marginTop: 26,
+    minHeight: 56,
+    justifyContent: 'center',
+    paddingHorizontal: 30,
+    shadowColor: colors.primaryDeep,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
+  },
+  signInButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '900',
   },
 });
