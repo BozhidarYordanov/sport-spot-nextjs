@@ -9,6 +9,9 @@
       "distribution": "internal"
     },
     "preview": {
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://sport-spot-web.netlify.app/api"
+      },
       "distribution": "internal",
       "android": {
         "buildType": "apk"
