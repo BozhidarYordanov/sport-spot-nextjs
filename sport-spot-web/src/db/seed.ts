@@ -191,6 +191,34 @@ const chunk = <T>(items: T[], size: number) => {
 const getBulgarianPhoneNumber = (index: number) =>
   `0888${String(100000 + index).padStart(6, "0")}`;
 
+const getWorkoutAudienceDetails = (workout: WorkoutSeed) => {
+  if (workout.category === "Combat") {
+    return {
+      suitableFor: "Adults; Fitness enthusiasts; Intermediate to Advanced",
+      whatToBring: "Boxing gloves; Hand wraps; Water bottle; Athletic shoes",
+    };
+  }
+
+  if (workout.category === "Mind & Body") {
+    return {
+      suitableFor: "All levels; Beginners; Anyone seeking flexibility",
+      whatToBring: "Yoga mat; Comfortable clothing; Towel",
+    };
+  }
+
+  if (workout.category === "Strength" || workout.category === "Cardio") {
+    return {
+      suitableFor: "Active individuals; Cardio fans; Weight lifters",
+      whatToBring: "Sports shoes; Towel; Energy drink; Clean shirt",
+    };
+  }
+
+  return {
+    suitableFor: "Fitness lovers; Gym members",
+    whatToBring: "Water; Towel; Clean shoes",
+  };
+};
+
 const seed = async () => {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -241,18 +269,22 @@ const seed = async () => {
     console.log("Users seeded...");
 
     console.log("Seeding workout types...");
-    const workoutRows = WORKOUT_TYPES_TO_CREATE.map((workout) => ({
-      title: workout.title,
-      description: `${workout.title} class`,
-      descriptionLong: `A ${workout.duration}-minute ${workout.category.toLowerCase()} session designed for all levels.`,
-      durationMinutes: workout.duration,
-      difficultyLevel: workout.difficulty,
-      slug: slugify(workout.title),
-      suitableFor: "All levels",
-      whatToBring: "Water bottle and towel",
-      category: workout.category,
-      imageUrl: workout.file,
-    }));
+    const workoutRows = WORKOUT_TYPES_TO_CREATE.map((workout) => {
+      const audienceDetails = getWorkoutAudienceDetails(workout);
+
+      return {
+        title: workout.title,
+        description: `${workout.title} class`,
+        descriptionLong: `A ${workout.duration}-minute ${workout.category.toLowerCase()} session designed for all levels.`,
+        durationMinutes: workout.duration,
+        difficultyLevel: workout.difficulty,
+        slug: slugify(workout.title),
+        suitableFor: audienceDetails.suitableFor,
+        whatToBring: audienceDetails.whatToBring,
+        category: workout.category,
+        imageUrl: workout.file,
+      };
+    });
 
     const insertedWorkouts = await db
       .insert(workoutTypes)
