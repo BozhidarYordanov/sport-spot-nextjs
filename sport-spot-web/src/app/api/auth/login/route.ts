@@ -11,6 +11,18 @@ type LoginBody = {
   password?: unknown;
 };
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export const OPTIONS = async () =>
+  new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+
 export const POST = async (request: Request) => {
   let body: LoginBody;
 
@@ -19,7 +31,7 @@ export const POST = async (request: Request) => {
   } catch {
     return NextResponse.json(
       { success: false, error: "Invalid JSON body" },
-      { status: 400 }
+      { status: 400, headers: corsHeaders }
     );
   }
 
@@ -29,7 +41,7 @@ export const POST = async (request: Request) => {
   if (!email || !password) {
     return NextResponse.json(
       { success: false, error: "Email and password are required" },
-      { status: 400 }
+      { status: 400, headers: corsHeaders }
     );
   }
 
@@ -50,7 +62,7 @@ export const POST = async (request: Request) => {
   if (!user) {
     return NextResponse.json(
       { success: false, error: "Invalid email or password" },
-      { status: 401 }
+      { status: 401, headers: corsHeaders }
     );
   }
 
@@ -58,21 +70,24 @@ export const POST = async (request: Request) => {
   if (!passwordMatches) {
     return NextResponse.json(
       { success: false, error: "Invalid email or password" },
-      { status: 401 }
+      { status: 401, headers: corsHeaders }
     );
   }
 
   const role = user.role ?? "user";
   const token = await signApiToken({ userId: user.id, role });
 
-  return NextResponse.json({
-    success: true,
-    token,
-    user: {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role,
+  return NextResponse.json(
+    {
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role,
+      },
     },
-  });
+    { status: 200, headers: corsHeaders }
+  );
 };

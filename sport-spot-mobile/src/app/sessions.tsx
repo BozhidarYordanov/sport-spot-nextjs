@@ -8,7 +8,7 @@ export default function SessionsScreen() {
       <View style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.eyebrow}>Available Classes</Text>
-          <Text style={styles.title}>Today's training schedule is ready.</Text>
+          <Text style={styles.title}>{"Today's training schedule is ready."}</Text>
           <Text style={styles.body}>The paginated class list will connect to the Next.js API here.</Text>
 
           <TouchableOpacity activeOpacity={0.88} style={styles.button} onPress={() => router.push('/session-details')}>

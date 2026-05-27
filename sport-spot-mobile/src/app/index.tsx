@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme/colors';
 
 export default function HomeScreen() {
-  const { isLoggedIn, toggleAuth } = useAuth();
+  const { isLoggedIn, logout, user } = useAuth();
 
   const handlePrimaryAction = () => {
     router.push(isLoggedIn ? '/sessions' : '/login');
@@ -31,7 +31,7 @@ export default function HomeScreen() {
         <View style={styles.panel}>
           <Text style={styles.kicker}>{isLoggedIn ? 'Member Access' : 'Train Smarter'}</Text>
           <Text style={styles.title}>
-            {isLoggedIn ? 'Welcome back, Athlete!' : 'Find the class that moves you.'}
+            {isLoggedIn ? `Welcome back, ${user?.fullName ?? 'Athlete'}!` : 'Find the class that moves you.'}
           </Text>
           <Text style={styles.body}>
             {isLoggedIn
@@ -45,11 +45,11 @@ export default function HomeScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.78} style={styles.ghostButton} onPress={toggleAuth}>
-            <Text style={styles.ghostButtonText}>
-              {isLoggedIn ? 'Preview Logged Out State' : 'Preview Logged In State'}
-            </Text>
-          </TouchableOpacity>
+          {isLoggedIn ? (
+            <TouchableOpacity activeOpacity={0.78} style={styles.ghostButton} onPress={logout}>
+              <Text style={styles.ghostButtonText}>Sign Out</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </SafeAreaView>
