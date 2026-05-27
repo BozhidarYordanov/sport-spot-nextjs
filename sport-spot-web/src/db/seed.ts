@@ -342,7 +342,7 @@ const seed = async () => {
     console.log("Schedule seeded...");
 
     console.log("Seeding bookings...");
-    const userIds = USERS_TO_CREATE.filter((user) => user.role === "user")
+    const userIds = USERS_TO_CREATE
       .map((user) => profileIdByEmail.get(user.email))
       .filter((id): id is number => typeof id === "number");
 
