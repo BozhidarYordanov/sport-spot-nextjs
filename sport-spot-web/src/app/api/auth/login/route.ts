@@ -11,18 +11,6 @@ type LoginBody = {
   password?: unknown;
 };
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export const OPTIONS = async () =>
-  new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
-
 export const POST = async (request: Request) => {
   let body: LoginBody;
 
@@ -31,7 +19,7 @@ export const POST = async (request: Request) => {
   } catch {
     return NextResponse.json(
       { success: false, error: "Invalid JSON body" },
-      { status: 400, headers: corsHeaders }
+      { status: 400 }
     );
   }
 
@@ -41,7 +29,7 @@ export const POST = async (request: Request) => {
   if (!email || !password) {
     return NextResponse.json(
       { success: false, error: "Email and password are required" },
-      { status: 400, headers: corsHeaders }
+      { status: 400 }
     );
   }
 
@@ -62,7 +50,7 @@ export const POST = async (request: Request) => {
   if (!user) {
     return NextResponse.json(
       { success: false, error: "Invalid email or password" },
-      { status: 401, headers: corsHeaders }
+      { status: 401 }
     );
   }
 
@@ -70,7 +58,7 @@ export const POST = async (request: Request) => {
   if (!passwordMatches) {
     return NextResponse.json(
       { success: false, error: "Invalid email or password" },
-      { status: 401, headers: corsHeaders }
+      { status: 401 }
     );
   }
 
@@ -88,6 +76,6 @@ export const POST = async (request: Request) => {
         role,
       },
     },
-    { status: 200, headers: corsHeaders }
+    { status: 200 }
   );
 };
