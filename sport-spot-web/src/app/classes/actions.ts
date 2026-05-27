@@ -8,7 +8,10 @@ import { db } from '@/db';
 import { bookings, schedule } from '@/db/schema';
 import { verifyToken } from '@/lib/auth';
 
-type ActionResult = { success: true } | { error: string };
+type ActionResult = { success: true; enrolledCount: number } | { error: string };
+type ActionOptions = {
+  revalidatePaths?: boolean;
+};
 
 const getViewer = async () => {
   const cookieStore = await cookies();
@@ -21,7 +24,8 @@ const getViewer = async () => {
 };
 
 export const bookSessionAction = async (
-  scheduleId: number
+  scheduleId: number,
+  options: ActionOptions = {}
 ): Promise<ActionResult> => {
   const viewer = await getViewer();
   if (!viewer) {
@@ -74,7 +78,10 @@ export const bookSessionAction = async (
           lt(schedule.enrolledCount, schedule.capacity)
         )
       )
-      .returning({ id: schedule.id });
+      .returning({
+        id: schedule.id,
+        enrolledCount: schedule.enrolledCount,
+      });
 
     if (updated.length === 0) {
       return { error: 'Class is full' };
@@ -96,9 +103,12 @@ export const bookSessionAction = async (
       throw error;
     }
 
-    revalidatePath('/classes/[slug]');
-    revalidatePath('/schedule');
-    return { success: true };
+    if (options.revalidatePaths ?? true) {
+      revalidatePath('/classes/[slug]');
+      revalidatePath('/schedule');
+    }
+
+    return { success: true, enrolledCount: updated[0].enrolledCount };
   } catch (error) {
     console.error('bookSessionAction failed', error);
     return { error: 'Unable to book session' };
@@ -106,7 +116,8 @@ export const bookSessionAction = async (
 };
 
 export const cancelBookingAction = async (
-  scheduleId: number
+  scheduleId: number,
+  options: ActionOptions = {}
 ): Promise<ActionResult> => {
   const viewer = await getViewer();
   if (!viewer) {
@@ -133,16 +144,20 @@ export const cancelBookingAction = async (
 
     await db.delete(bookings).where(eq(bookings.id, booking.id));
 
-    await db
+    const updated = await db
       .update(schedule)
       .set({
         enrolledCount: sql`GREATEST(${schedule.enrolledCount} - 1, 0)`,
       })
-      .where(eq(schedule.id, scheduleId));
+      .where(eq(schedule.id, scheduleId))
+      .returning({ enrolledCount: schedule.enrolledCount });
 
-    revalidatePath('/classes/[slug]');
-    revalidatePath('/schedule');
-    return { success: true };
+    if (options.revalidatePaths ?? true) {
+      revalidatePath('/classes/[slug]');
+      revalidatePath('/schedule');
+    }
+
+    return { success: true, enrolledCount: updated[0]?.enrolledCount ?? 0 };
   } catch (error) {
     console.error('cancelBookingAction failed', error);
     return { error: 'Unable to cancel booking' };

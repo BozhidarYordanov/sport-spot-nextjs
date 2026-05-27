@@ -11,6 +11,9 @@ type SessionActionButtonProps = {
   labelIdle?: string;
   labelPending?: string;
   className?: string;
+  refreshOnSuccess?: boolean;
+  revalidatePathsOnSuccess?: boolean;
+  onSuccess?: (result: { variant: 'book' | 'cancel'; enrolledCount: number }) => void;
 };
 
 const LABELS = {
@@ -40,6 +43,9 @@ export default function SessionActionButton({
   labelIdle,
   labelPending,
   className,
+  refreshOnSuccess = true,
+  revalidatePathsOnSuccess = true,
+  onSuccess,
 }: SessionActionButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -66,10 +72,19 @@ export default function SessionActionButton({
       try {
         const result =
           variant === 'book'
-            ? await bookSessionAction(scheduleId)
-            : await cancelBookingAction(scheduleId);
+            ? await bookSessionAction(scheduleId, {
+                revalidatePaths: revalidatePathsOnSuccess,
+              })
+            : await cancelBookingAction(scheduleId, {
+                revalidatePaths: revalidatePathsOnSuccess,
+              });
 
         if ('success' in result) {
+          onSuccess?.({ variant, enrolledCount: result.enrolledCount });
+          if (!refreshOnSuccess) {
+            return;
+          }
+
           router.refresh();
         }
       } finally {

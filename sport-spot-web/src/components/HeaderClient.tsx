@@ -144,6 +144,7 @@ export default function HeaderClient({
           <div className="flex-shrink-0">
             <Link
               href="/"
+              prefetch={false}
               className="text-xl font-bold tracking-tight text-slate-900 hover:text-slate-700 transition-colors"
             >
               SportSpot
@@ -152,22 +153,22 @@ export default function HeaderClient({
 
           <div className="ml-auto hidden items-center gap-6 md:flex">
             <nav className="flex items-center gap-5">
-              <Link href="/" className={navLinkClass}>
+              <Link href="/" prefetch={false} className={navLinkClass}>
                 Home
               </Link>
-              <Link href="/classes" className={navLinkClass}>
+              <Link href="/classes" prefetch={false} className={navLinkClass}>
                 Classes
               </Link>
-              <Link href="/schedule" className={navLinkClass}>
+              <Link href="/schedule" prefetch={false} className={navLinkClass}>
                 Schedule
               </Link>
               {isAuthenticated ? (
-                <Link href="/dashboard" className={navLinkClass}>
+                <Link href="/dashboard" prefetch={false} className={navLinkClass}>
                   Dashboard
                 </Link>
               ) : null}
               {isAdmin ? (
-                <Link href="/admin" className={adminLinkClass}>
+                <Link href="/admin" prefetch={false} className={adminLinkClass}>
                   <AdminShieldIcon />
                   Admin
                 </Link>
@@ -197,6 +198,7 @@ export default function HeaderClient({
                   <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
                     <Link
                       href="/profile"
+                      prefetch={false}
                       onClick={() => setIsDropdownOpen(false)}
                       className={dropdownItemClass}
                     >
@@ -224,12 +226,14 @@ export default function HeaderClient({
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
+                  prefetch={false}
                   className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
+                  prefetch={false}
                   className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                 >
                   Register
@@ -285,23 +289,24 @@ export default function HeaderClient({
         <div className="px-6 pb-6 pt-3">
           <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-xl shadow-slate-100/50">
             <nav className="flex flex-col space-y-4 text-sm font-medium text-slate-600">
-              <Link href="/" onClick={closeMobileMenu}>
+              <Link href="/" prefetch={false} onClick={closeMobileMenu}>
                 Home
               </Link>
-              <Link href="/classes" onClick={closeMobileMenu}>
+              <Link href="/classes" prefetch={false} onClick={closeMobileMenu}>
                 Classes
               </Link>
-              <Link href="/schedule" onClick={closeMobileMenu}>
+              <Link href="/schedule" prefetch={false} onClick={closeMobileMenu}>
                 Schedule
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" onClick={closeMobileMenu}>
+                  <Link href="/dashboard" prefetch={false} onClick={closeMobileMenu}>
                     Dashboard
                   </Link>
                   {isAdmin ? (
                     <Link
                       href="/admin"
+                      prefetch={false}
                       onClick={closeMobileMenu}
                       className={adminLinkClass}
                     >
@@ -335,6 +340,7 @@ export default function HeaderClient({
                 <div className="flex items-center gap-3">
                   <Link
                     href="/login"
+                    prefetch={false}
                     onClick={closeMobileMenu}
                     className="flex-1 cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md"
                   >
@@ -342,6 +348,7 @@ export default function HeaderClient({
                   </Link>
                   <Link
                     href="/register"
+                    prefetch={false}
                     onClick={closeMobileMenu}
                     className="flex-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   >

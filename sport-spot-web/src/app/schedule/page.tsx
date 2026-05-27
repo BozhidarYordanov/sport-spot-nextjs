@@ -2,11 +2,11 @@ import { and, asc, eq, gte, lt, lte, sql } from 'drizzle-orm';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
-import SessionActionButton from '@/app/classes/SessionActionButton';
 import { db } from '@/db';
 import { bookings, schedule, workoutTypes } from '@/db/schema';
 import { verifyToken } from '@/lib/auth';
 import RollingCalendar from './RollingCalendar';
+import ScheduleSessionCard from './ScheduleSessionCard';
 
 type SchedulePageProps = {
   searchParams?: Promise<{
@@ -366,65 +366,22 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
                   </div>
                 ) : (
                   sessions.map((session) => {
-                    const availability = Math.max(
-                      0,
-                      session.capacity - session.enrolledCount
-                    );
-                    const isBooked = Boolean(session.bookingId);
-
                     return (
-                      <article
+                      <ScheduleSessionCard
                         key={session.id}
-                        className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                      >
-                        <div className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-center">
-                          <div>
-                            <p className="text-sm font-semibold text-violet-600">
-                              {timeFormatter.format(session.startTime)}
-                            </p>
-                            <h3 className="mt-1 text-base font-bold text-slate-950">
-                              {session.title}
-                            </h3>
-                            <p className="mt-1 text-sm text-slate-500">
-                              {session.trainerName} &bull; {session.room}
-                            </p>
-                            <div className="mt-3">
-                              <DifficultyBadge level={session.difficultyLevel} />
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-start gap-3 sm:items-end">
-                            <span className="rounded-full border border-indigo-100 bg-white px-4 py-1 text-xs font-medium text-indigo-600">
-                              {availability} spots available
-                            </span>
-                            {isBooked ? (
-                              <>
-                                <span className="text-xs font-bold text-fuchsia-600">
-                                  Booked
-                                </span>
-                                <SessionActionButton
-                                  scheduleId={session.id}
-                                  variant="cancel"
-                                  className="mt-0 border-rose-400 bg-white px-4 py-2 text-rose-600 hover:bg-rose-50"
-                                />
-                              </>
-                            ) : viewer ? (
-                              <SessionActionButton
-                                scheduleId={session.id}
-                                variant="book"
-                                className="mt-0 min-w-32 justify-center px-7 py-2"
-                              />
-                            ) : (
-                              <Link
-                                href="/login"
-                                className="mt-0 inline-flex min-w-32 justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-7 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-                              >
-                                Reserve
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                      </article>
+                        isAuthenticated={Boolean(viewer)}
+                        session={{
+                          id: session.id,
+                          formattedTime: timeFormatter.format(session.startTime),
+                          trainerName: session.trainerName,
+                          room: session.room,
+                          capacity: session.capacity,
+                          enrolledCount: session.enrolledCount,
+                          title: session.title,
+                          difficultyLevel: session.difficultyLevel,
+                          isBooked: Boolean(session.bookingId),
+                        }}
+                      />
                     );
                   })
                 )}
