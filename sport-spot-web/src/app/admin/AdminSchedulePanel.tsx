@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import DebouncedSearch from '@/components/DebouncedSearch';
 import {
   createScheduleSessionAction,
   deleteScheduleSessionAction,
@@ -253,7 +254,6 @@ export default function AdminSchedulePanel({
   currentPage,
   totalPages,
 }: AdminSchedulePanelProps) {
-  const [searchValue, setSearchValue] = useState(search);
   const [isAddSessionOpen, setIsAddSessionOpen] = useState(false);
   const [isEditSessionOpen, setIsEditSessionOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<ScheduleRow | null>(
@@ -270,8 +270,8 @@ export default function AdminSchedulePanel({
   const buildHref = (page: number) => {
     const params = new URLSearchParams({ tab: 'schedule' });
 
-    if (searchValue.trim()) {
-      params.set('search', searchValue.trim());
+    if (search) {
+      params.set('search', search);
     }
 
     if (page > 1) {
@@ -287,19 +287,6 @@ export default function AdminSchedulePanel({
       : Array.from(
           new Set([1, currentPage - 1, currentPage, currentPage + 1, totalPages])
         ).filter((page) => page >= 1 && page <= totalPages);
-
-  const handleSearchChange = (nextValue: string) => {
-    setSearchValue(nextValue);
-
-    const params = new URLSearchParams({ tab: 'schedule' });
-    const trimmedValue = nextValue.trim();
-
-    if (trimmedValue) {
-      params.set('search', trimmedValue);
-    }
-
-    router.replace(`/admin?${params.toString()}`, { scroll: false });
-  };
 
   const handleDelete = (sessionId: number) => {
     setError(null);
@@ -377,13 +364,10 @@ export default function AdminSchedulePanel({
           Search sessions
         </label>
         <div className="mt-1.5">
-          <input
-            id="admin-schedule-search"
-            type="search"
-            value={searchValue}
-            onChange={(event) => handleSearchChange(event.target.value)}
+          <DebouncedSearch
             placeholder="Search by workout, trainer, or room..."
-            className="h-9 w-full rounded-full border border-indigo-200 bg-white px-4 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+            paramKey="search"
+            className="h-9 w-full rounded-full border border-indigo-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
           />
         </div>
       </div>

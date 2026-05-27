@@ -1,7 +1,9 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
+
+import DebouncedSearch from '@/components/DebouncedSearch';
 
 type DifficultyOption = {
   label: string;
@@ -17,7 +19,6 @@ type FiltersClientProps = {
 };
 
 export default function FiltersClient({
-  search,
   category,
   difficulty,
   categories,
@@ -26,8 +27,7 @@ export default function FiltersClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-  const [searchValue, setSearchValue] = useState(search);
+  const [, startTransition] = useTransition();
 
   const applyParams = (nextParams: URLSearchParams) => {
     const query = nextParams.toString();
@@ -35,16 +35,6 @@ export default function FiltersClient({
     startTransition(() => {
       router.replace(nextUrl, { scroll: false });
     });
-  };
-
-  const setSingleParam = (key: string, value: string) => {
-    const nextParams = new URLSearchParams(searchParams.toString());
-    if (value) {
-      nextParams.set(key, value);
-    } else {
-      nextParams.delete(key);
-    }
-    applyParams(nextParams);
   };
 
   const toggleMultiParam = (key: string, value: string) => {
@@ -62,12 +52,6 @@ export default function FiltersClient({
     applyParams(nextParams);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-    const trimmed = value.trim();
-    setSingleParam('search', trimmed);
-  };
-
   const basePillClass =
     'cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-200';
   const inactivePillClass =
@@ -79,38 +63,11 @@ export default function FiltersClient({
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
       <div className="space-y-3">
         <p className="text-sm font-semibold text-slate-700">Search by title</p>
-        <div className="relative">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="h-4 w-4"
-            >
-              <path
-                d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="m21 21-4.3-4.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <input
-            type="search"
-            name="search"
-            value={searchValue}
-            onChange={(event) => handleSearchChange(event.target.value)}
-            placeholder="Try: Yoga, Pilates, Boxing..."
-            aria-busy={isPending}
-            className="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-          />
-        </div>
+        <DebouncedSearch
+          placeholder="Try: Yoga, Pilates, Boxing..."
+          paramKey="search"
+          className="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+        />
       </div>
 
       <div className="grid gap-5">

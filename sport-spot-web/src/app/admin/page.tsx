@@ -5,10 +5,10 @@ import { and, asc, desc, eq, gte, ilike, or, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { bookings, profiles, schedule, workoutTypes } from '@/db/schema';
 import { getSession } from '@/lib/auth';
+import DebouncedSearch from '@/components/DebouncedSearch';
 import AdminCancelBookingButton from './AdminCancelBookingButton';
 import AdminDeleteUserButton from './AdminDeleteUserButton';
 import AdminSchedulePanel from './AdminSchedulePanel';
-import AdminSearchInput from './AdminSearchInput';
 import AdminWorkoutTypesPanel from './AdminWorkoutTypesPanel';
 
 type AdminPageProps = {
@@ -417,7 +417,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     Search bookings
                   </label>
                   <div className="mt-1.5">
-                    <AdminSearchInput initialValue={search} />
+                    <DebouncedSearch
+                      placeholder="Search by user name or workout title"
+                      paramKey="search"
+                      className="h-9 w-full rounded-full border border-indigo-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                    />
                   </div>
                 </div>
 
