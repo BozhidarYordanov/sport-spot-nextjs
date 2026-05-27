@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,26 +15,55 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme/colors';
 
-export default function LoginScreen() {
-  const { login } = useAuth();
+type RegisterField = 'fullName' | 'email' | 'password' | 'confirmPassword';
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function RegisterScreen() {
+  const { register } = useAuth();
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [focusedField, setFocusedField] = useState<RegisterField | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
+  const fieldsHaveValues =
+    fullName.trim().length > 0 &&
+    email.trim().length > 0 &&
+    password.length > 0 &&
+    confirmPassword.length > 0;
+  const canSubmit = fieldsHaveValues && !isSubmitting;
+
+  const validateForm = () => {
+    if (!fieldsHaveValues) {
+      return 'Complete all fields to create your account.';
+    }
+
+    if (!emailPattern.test(email.trim())) {
+      return 'Enter a valid email address.';
+    }
+
+    if (password !== confirmPassword) {
+      return 'Passwords do not match.';
+    }
+
+    return null;
+  };
 
   const handleSubmit = async () => {
-    if (!canSubmit) {
-      setError('Enter your email and password to continue.');
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setError(null);
     setIsSubmitting(true);
 
-    const result = await login(email, password);
+    const result = await register(fullName, email, password);
 
     setIsSubmitting(false);
 
@@ -42,7 +72,7 @@ export default function LoginScreen() {
       return;
     }
 
-    setError(result.error ?? 'Unable to sign in. Please check your details.');
+    setError(result.error ?? 'Unable to create account. Please try again.');
   };
 
   return (
@@ -51,16 +81,38 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
-        <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.card}>
             <View style={styles.brandBadge}>
               <Text style={styles.brandBadgeText}>SS</Text>
             </View>
 
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>Sign in to reserve your next SportSpot class.</Text>
+            <Text style={styles.title}>Create account</Text>
+            <Text style={styles.subtitle}>Join SportSpot and book your next class in seconds.</Text>
 
             <View style={styles.form}>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  editable={!isSubmitting}
+                  onBlur={() => setFocusedField(null)}
+                  onChangeText={setFullName}
+                  onFocus={() => setFocusedField('fullName')}
+                  placeholder="Alex Morgan"
+                  placeholderTextColor={colors.textMuted}
+                  returnKeyType="next"
+                  style={[styles.input, focusedField === 'fullName' && styles.inputFocused]}
+                  textContentType="name"
+                  value={fullName}
+                />
+              </View>
+
               <View style={styles.fieldGroup}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput
@@ -90,14 +142,33 @@ export default function LoginScreen() {
                   onBlur={() => setFocusedField(null)}
                   onChangeText={setPassword}
                   onFocus={() => setFocusedField('password')}
+                  placeholder="Create a password"
+                  placeholderTextColor={colors.textMuted}
+                  returnKeyType="next"
+                  secureTextEntry
+                  style={[styles.input, focusedField === 'password' && styles.inputFocused]}
+                  textContentType="newPassword"
+                  value={password}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!isSubmitting}
+                  onBlur={() => setFocusedField(null)}
+                  onChangeText={setConfirmPassword}
+                  onFocus={() => setFocusedField('confirmPassword')}
                   onSubmitEditing={handleSubmit}
-                  placeholder="Enter your password"
+                  placeholder="Confirm your password"
                   placeholderTextColor={colors.textMuted}
                   returnKeyType="go"
                   secureTextEntry
-                  style={[styles.input, focusedField === 'password' && styles.inputFocused]}
-                  textContentType="password"
-                  value={password}
+                  style={[styles.input, focusedField === 'confirmPassword' && styles.inputFocused]}
+                  textContentType="newPassword"
+                  value={confirmPassword}
                 />
               </View>
 
@@ -112,23 +183,23 @@ export default function LoginScreen() {
                 {isSubmitting ? (
                   <ActivityIndicator color={colors.white} />
                 ) : (
-                  <Text style={styles.buttonText}>Sign In</Text>
+                  <Text style={styles.buttonText}>Create Account</Text>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity
                 activeOpacity={0.72}
                 disabled={isSubmitting}
-                onPress={() => router.push('/register')}
+                onPress={() => router.push('/login')}
                 style={styles.footerLink}
               >
                 <Text style={styles.footerText}>
-                  Don&apos;t have an account? <Text style={styles.footerTextStrong}>Sign Up</Text>
+                  Already have an account? <Text style={styles.footerTextStrong}>Sign In</Text>
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -143,7 +214,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 22,
   },

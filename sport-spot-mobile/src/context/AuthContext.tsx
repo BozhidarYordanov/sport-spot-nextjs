@@ -18,7 +18,7 @@ type LoginResult = {
   error?: string;
 };
 
-type LoginResponse = {
+type AuthResponse = {
   success?: boolean;
   token?: unknown;
   user?: unknown;
@@ -31,6 +31,7 @@ type AuthContextValue = {
   isLoading: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
+  register: (fullName: string, email: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
 };
 
@@ -82,7 +83,7 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Unable to sign in. Please try again.';
+  return 'Something went wrong. Please try again.';
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -147,6 +148,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
+  const persistAuthSession = useCallback(async (data: AuthResponse, fallbackError: string): Promise<LoginResult> => {
+    if (typeof data.token !== 'string' || !isAuthUser(data.user)) {
+      return {
+        success: false,
+        error: fallbackError,
+      };
+    }
+
+    await Promise.all([
+      authStorage.setItem(TOKEN_KEY, data.token),
+      authStorage.setItem(USER_KEY, JSON.stringify(data.user)),
+    ]);
+
+    setToken(data.token);
+    setUser(data.user);
+
+    return { success: true };
+  }, []);
+
   const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
     if (!API_BASE_URL) {
       return {
@@ -168,7 +188,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }),
       });
 
-      const data = (await response.json()) as LoginResponse;
+      const data = (await response.json()) as AuthResponse;
 
       if (!response.ok || !data.success) {
         return {
@@ -177,29 +197,57 @@ export function AuthProvider({ children }: PropsWithChildren) {
         };
       }
 
-      if (typeof data.token !== 'string' || !isAuthUser(data.user)) {
-        return {
-          success: false,
-          error: 'Unexpected login response. Please try again.',
-        };
-      }
-
-      await Promise.all([
-        authStorage.setItem(TOKEN_KEY, data.token),
-        authStorage.setItem(USER_KEY, JSON.stringify(data.user)),
-      ]);
-
-      setToken(data.token);
-      setUser(data.user);
-
-      return { success: true };
+      return persistAuthSession(data, 'Unexpected login response. Please try again.');
     } catch (error) {
       return {
         success: false,
         error: getErrorMessage(error),
       };
     }
-  }, []);
+  }, [persistAuthSession]);
+
+  const register = useCallback(
+    async (fullName: string, email: string, password: string): Promise<LoginResult> => {
+      if (!API_BASE_URL) {
+        return {
+          success: false,
+          error: 'Missing EXPO_PUBLIC_API_BASE_URL configuration.',
+        };
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            email: email.trim(),
+            password,
+          }),
+        });
+
+        const data = (await response.json()) as AuthResponse;
+
+        if (!response.ok || !data.success) {
+          return {
+            success: false,
+            error: typeof data.error === 'string' ? data.error : 'Unable to create account.',
+          };
+        }
+
+        return persistAuthSession(data, 'Unexpected registration response. Please try again.');
+      } catch (error) {
+        return {
+          success: false,
+          error: getErrorMessage(error),
+        };
+      }
+    },
+    [persistAuthSession],
+  );
 
   const logout = useCallback(async () => {
     await Promise.all([
@@ -218,9 +266,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isLoading,
       isLoggedIn: Boolean(token && user),
       login,
+      register,
       logout,
     }),
-    [isLoading, login, logout, token, user],
+    [isLoading, login, logout, register, token, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
