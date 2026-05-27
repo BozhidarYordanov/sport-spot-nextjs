@@ -2,7 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import * as schema from "./schema";
 import { bookings, profiles, schedule, userRoles, workoutTypes } from "./schema";
 
@@ -229,10 +229,13 @@ const seed = async () => {
   const db = drizzle(client, { schema });
 
   try {
-    console.log("Clearing existing data...");
-    await db.execute(
-      sql`TRUNCATE TABLE ${bookings}, ${userRoles}, ${schedule}, ${workoutTypes}, ${profiles} RESTART IDENTITY CASCADE`
-    );
+    console.log("Clearing existing database rows...");
+    await db.delete(bookings);
+    await db.delete(schedule);
+    await db.delete(userRoles);
+    await db.delete(profiles);
+    await db.delete(workoutTypes);
+    console.log("Database successfully cleared. Inserting new seed data...");
 
     console.log("Seeding users...");
     const hashedPassword = await bcrypt.hash("pass123!", 10);
