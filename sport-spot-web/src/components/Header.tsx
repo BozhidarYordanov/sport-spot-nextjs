@@ -7,6 +7,7 @@ export default async function Header() {
   return (
     <HeaderClient
       userName={session?.fullName ?? null}
+      avatarUrl={session?.avatarUrl ?? null}
       isAuthenticated={Boolean(session)}
       isAdmin={hasAdminAccess}
     />

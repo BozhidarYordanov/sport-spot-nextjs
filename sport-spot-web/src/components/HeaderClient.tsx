@@ -1,13 +1,15 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 
 import { logoutUserAction } from '@/app/(auth)/actions';
 
 type HeaderClientProps = {
   userName: string | null;
+  avatarUrl: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
 };
@@ -17,6 +19,10 @@ const navLinkClass =
 
 const adminLinkClass =
   'border border-violet-200 text-violet-700 bg-violet-50/50 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-violet-100 transition-all';
+const dropdownItemClass =
+  'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-slate-50 cursor-pointer text-slate-700';
+const placeholderAvatar =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 96 96%22%3E%3Crect width=%2296%22 height=%2296%22 rx=%2248%22 fill=%22%23f3e8ff%22/%3E%3Ccircle cx=%2248%22 cy=%2238%22 r=%2216%22 fill=%22%238b5cf6%22/%3E%3Cpath d=%22M20 82c4-18 16-28 28-28s24 10 28 28%22 fill=%22%23c4b5fd%22/%3E%3C/svg%3E';
 
 function AdminShieldIcon() {
   return (
@@ -36,13 +42,53 @@ function AdminShieldIcon() {
   );
 }
 
+function UserIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2" />
+      <path d="M15 12H3" />
+      <path d="m6 8-4 4 4 4" />
+    </svg>
+  );
+}
+
 export default function HeaderClient({
   userName,
+  avatarUrl,
   isAuthenticated,
   isAdmin,
 }: HeaderClientProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const avatarMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const toggleMobileMenu = () => {
@@ -53,7 +99,31 @@ export default function HeaderClient({
     setIsMobileMenuOpen(false);
   };
 
+  useEffect(() => {
+    if (!isDropdownOpen) {
+      return;
+    }
+
+    const handleClickAway = (event: MouseEvent | TouchEvent) => {
+      if (
+        avatarMenuRef.current &&
+        !avatarMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickAway);
+    document.addEventListener('touchstart', handleClickAway);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickAway);
+      document.removeEventListener('touchstart', handleClickAway);
+    };
+  }, [isDropdownOpen]);
+
   const handleLogout = () => {
+    setIsDropdownOpen(false);
     startTransition(() => {
       void (async () => {
         await logoutUserAction();
@@ -64,6 +134,7 @@ export default function HeaderClient({
   };
 
   const firstName = userName?.split(' ')[0] ?? 'there';
+  const resolvedAvatarUrl = avatarUrl || placeholderAvatar;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md relative">
@@ -104,19 +175,50 @@ export default function HeaderClient({
             </nav>
 
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm font-semibold text-slate-600">
-                  Hi, {firstName}!
-                </span>
+              <div ref={avatarMenuRef} className="relative flex items-center">
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  disabled={isPending}
-                  aria-busy={isPending}
-                  className="cursor-pointer rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  aria-label="Open profile menu"
+                  aria-expanded={isDropdownOpen}
+                  className="h-9 w-9 cursor-pointer overflow-hidden rounded-full border border-slate-100 shadow-sm transition-all hover:scale-105 active:scale-95"
                 >
-                  {isPending ? 'Logging out...' : 'Logout'}
+                  <Image
+                    src={resolvedAvatarUrl}
+                    alt={userName ? `${userName} avatar` : 'User avatar'}
+                    width={36}
+                    height={36}
+                    unoptimized
+                    className="h-full w-full object-cover"
+                  />
                 </button>
+
+                {isDropdownOpen ? (
+                  <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className={dropdownItemClass}
+                    >
+                      <UserIcon />
+                      Profile
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      disabled={isPending}
+                      aria-busy={isPending}
+                      className={`${dropdownItemClass} text-rose-700 disabled:cursor-not-allowed disabled:opacity-70`}
+                    >
+                      <span className="text-rose-700">
+                        <LogoutIcon />
+                      </span>
+                      <span className="font-medium text-rose-700">
+                        {isPending ? 'Logging out...' : 'Logout'}
+                      </span>
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : (
               <div className="flex items-center space-x-4">

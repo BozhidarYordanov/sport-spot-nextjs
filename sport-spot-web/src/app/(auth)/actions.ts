@@ -54,6 +54,7 @@ export const registerUserAction = async (
         id: profiles.id,
         email: profiles.email,
         fullName: profiles.fullName,
+        avatarUrl: profiles.avatarUrl,
       });
 
     const createdProfile = insertedProfiles[0];
@@ -70,6 +71,7 @@ export const registerUserAction = async (
       id: createdProfile.id,
       email: createdProfile.email,
       fullName: createdProfile.fullName,
+      avatarUrl: createdProfile.avatarUrl,
       role: "user",
     });
 
@@ -97,6 +99,7 @@ export const loginUserAction = async (
         id: profiles.id,
         email: profiles.email,
         fullName: profiles.fullName,
+        avatarUrl: profiles.avatarUrl,
         passwordHash: profiles.passwordHash,
         role: userRoles.role,
       })
@@ -123,6 +126,7 @@ export const loginUserAction = async (
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+      avatarUrl: user.avatarUrl,
       role,
     });
 

@@ -4,6 +4,7 @@ export type SessionPayload = {
   id: number;
   email: string;
   fullName: string;
+  avatarUrl: string | null;
   role: "admin" | "user";
 };
 
@@ -25,6 +26,11 @@ const toSessionPayload = (payload: unknown): SessionPayload | null => {
     typeof candidate.id !== "number" ||
     typeof candidate.email !== "string" ||
     typeof candidate.fullName !== "string" ||
+    !(
+      typeof candidate.avatarUrl === "string" ||
+      candidate.avatarUrl === null ||
+      candidate.avatarUrl === undefined
+    ) ||
     !isSessionRole(candidate.role)
   ) {
     return null;
@@ -34,6 +40,7 @@ const toSessionPayload = (payload: unknown): SessionPayload | null => {
     id: candidate.id,
     email: candidate.email,
     fullName: candidate.fullName,
+    avatarUrl: candidate.avatarUrl ?? null,
     role: candidate.role,
   };
 };
