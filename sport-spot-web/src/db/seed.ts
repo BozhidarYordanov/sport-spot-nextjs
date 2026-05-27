@@ -188,6 +188,9 @@ const chunk = <T>(items: T[], size: number) => {
   return chunks;
 };
 
+const getBulgarianPhoneNumber = (index: number) =>
+  `0888${String(100000 + index).padStart(6, "0")}`;
+
 const seed = async () => {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -204,12 +207,12 @@ const seed = async () => {
     );
 
     console.log("Seeding users...");
-    const passwordHash = await bcrypt.hash("pass123", 10);
+    const hashedPassword = await bcrypt.hash("pass123!", 10);
     const profileRows = USERS_TO_CREATE.map((user, index) => ({
       email: user.email,
-      passwordHash,
+      passwordHash: hashedPassword,
       fullName: user.fullName,
-      phone: `+1-555-01${String(index).padStart(2, "0")}`,
+      phone: getBulgarianPhoneNumber(index),
       avatarUrl: `https://i.pravatar.cc/150?img=${index + 1}`,
       createdAt: new Date(),
     }));
