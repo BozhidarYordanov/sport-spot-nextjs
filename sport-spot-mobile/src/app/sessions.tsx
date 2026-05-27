@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme/colors';
@@ -134,12 +134,6 @@ export default function SessionsScreen() {
     [token],
   );
 
-  useEffect(() => {
-    if (canFetch) {
-      void Promise.resolve().then(() => fetchSessions(page));
-    }
-  }, [canFetch, fetchSessions, page]);
-
   const handleRefresh = useCallback(() => {
     fetchedPages.current.clear();
     setHasMore(true);
@@ -147,6 +141,20 @@ export default function SessionsScreen() {
     setSessions([]);
     fetchSessions(1, true);
   }, [fetchSessions]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token) {
+        handleRefresh();
+      }
+    }, [handleRefresh, token]),
+  );
+
+  useEffect(() => {
+    if (canFetch && page > 1) {
+      void Promise.resolve().then(() => fetchSessions(page));
+    }
+  }, [canFetch, fetchSessions, page]);
 
   const handleEndReached = useCallback(() => {
     if (isLoading || isRefreshing || !hasMore || sessions.length === 0) {
