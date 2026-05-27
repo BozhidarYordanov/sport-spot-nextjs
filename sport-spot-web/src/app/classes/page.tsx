@@ -157,6 +157,7 @@ export default async function ClassesPage({ searchParams }: ClassesPageProps) {
                 <Link
                   key={workout.id}
                   href={`/classes/${workout.slug}`}
+                  prefetch={false}
                   className="group flex h-full cursor-pointer flex-col justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div>

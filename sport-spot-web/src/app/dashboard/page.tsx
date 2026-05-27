@@ -181,6 +181,7 @@ function Pagination({
     <nav className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
       <Link
         href={`/dashboard?page=${Math.max(1, currentPage - 1)}`}
+        prefetch={false}
         scroll={false}
         aria-disabled={currentPage === 1}
         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
@@ -204,6 +205,7 @@ function Pagination({
             ) : null}
             <Link
               href={`/dashboard?page=${page}`}
+              prefetch={false}
               scroll={false}
               className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 font-semibold transition ${
                 page === currentPage
@@ -218,6 +220,7 @@ function Pagination({
       })}
       <Link
         href={`/dashboard?page=${Math.min(totalPages, currentPage + 1)}`}
+        prefetch={false}
         scroll={false}
         aria-disabled={currentPage === totalPages}
         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
@@ -379,6 +382,7 @@ export default async function DashboardPage({
               </h2>
               <Link
                 href="/schedule"
+                prefetch={false}
                 className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
               >
                 Book a New Class
@@ -429,6 +433,7 @@ export default async function DashboardPage({
                     </p>
                     <Link
                       href="/schedule"
+                      prefetch={false}
                       className="mt-5 inline-flex rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                     >
                       Book a New Class

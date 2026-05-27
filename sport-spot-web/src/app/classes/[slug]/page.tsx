@@ -336,7 +336,11 @@ export default async function ClassDetailsPage({
                             variant={isBooked ? 'cancel' : 'book'}
                           />
                         ) : (
-                          <Link href="/login" className={guestButtonClass}>
+                          <Link
+                            href="/login"
+                            prefetch={false}
+                            className={guestButtonClass}
+                          >
                             Book Session
                           </Link>
                         )}
@@ -355,6 +359,7 @@ export default async function ClassDetailsPage({
                   {currentPage > 1 ? (
                     <Link
                       href={buildPageHref(currentPage - 1)}
+                      prefetch={false}
                       scroll={false}
                       className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                     >
@@ -371,6 +376,7 @@ export default async function ClassDetailsPage({
                       <>
                         <Link
                           href={buildPageHref(1)}
+                          prefetch={false}
                           scroll={false}
                           className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                         >
@@ -384,6 +390,7 @@ export default async function ClassDetailsPage({
                       <Link
                         key={`session-page-${page}`}
                         href={buildPageHref(page)}
+                        prefetch={false}
                         scroll={false}
                         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
                           page === currentPage
@@ -400,6 +407,7 @@ export default async function ClassDetailsPage({
                         <span className="text-slate-400">...</span>
                         <Link
                           href={buildPageHref(totalPages)}
+                          prefetch={false}
                           scroll={false}
                           className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                         >
@@ -412,6 +420,7 @@ export default async function ClassDetailsPage({
                   {currentPage < totalPages ? (
                     <Link
                       href={buildPageHref(currentPage + 1)}
+                      prefetch={false}
                       scroll={false}
                       className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-700"
                     >

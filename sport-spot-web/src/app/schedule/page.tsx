@@ -122,6 +122,7 @@ function Pagination({
     <nav className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
       <Link
         href={buildHref(Math.max(1, currentPage - 1))}
+        prefetch={false}
         scroll={false}
         aria-disabled={currentPage === 1}
         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
@@ -146,6 +147,7 @@ function Pagination({
             ) : null}
             <Link
               href={buildHref(page)}
+              prefetch={false}
               scroll={false}
               className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 font-semibold transition ${
                 page === currentPage
@@ -161,6 +163,7 @@ function Pagination({
 
       <Link
         href={buildHref(Math.min(totalPages, currentPage + 1))}
+        prefetch={false}
         scroll={false}
         aria-disabled={currentPage === totalPages}
         className={`rounded-full border px-3 py-1.5 font-semibold transition ${
