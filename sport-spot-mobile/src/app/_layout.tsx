@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme/colors';
 
 const AUTH_SEGMENTS = new Set(['login', 'register']);
-const PROTECTED_SEGMENTS = new Set(['sessions', 'session-details']);
+const PROTECTED_SEGMENTS = new Set(['classes']);
 
 export default function RootLayout() {
   return (
@@ -27,7 +27,7 @@ function GuardedStack() {
     }
 
     if (token && AUTH_SEGMENTS.has(currentSegment)) {
-      router.replace('/sessions');
+      router.replace('/classes');
       return;
     }
 
@@ -63,8 +63,8 @@ function GuardedStack() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: 'Sign In' }} />
       <Stack.Screen name="register" options={{ title: 'Create Account' }} />
-      <Stack.Screen name="sessions" options={{ title: 'Available Classes' }} />
-      <Stack.Screen name="session-details" options={{ title: 'Class Details' }} />
+      <Stack.Screen name="classes" options={{ title: 'Available Classes' }} />
+      <Stack.Screen name="classes/[slug]" options={{ title: 'Class Details' }} />
     </Stack>
   );
 }

@@ -61,9 +61,9 @@ const endpoints: EndpointDoc[] = [
     ],
   },
   {
-    id: "sessions-list",
+    id: "classes-list",
     method: "GET",
-    path: "/api/sessions?page=1&limit=10&search=yoga",
+    path: "/api/classes?page=1&pageSize=10&search=yoga",
     auth: "Bearer token",
     summary:
       "Lists upcoming schedule rows joined with workout_types metadata for compact mobile browsing.",
@@ -71,6 +71,7 @@ const endpoints: EndpointDoc[] = [
     response: pretty([
       {
         id: 42,
+        slug: "morning-yoga-flow",
         startTime: "2026-05-28T09:00:00.000Z",
         trainerName: "Maya Carter",
         room: "Studio A",
@@ -93,6 +94,11 @@ const endpoints: EndpointDoc[] = [
         name: "id",
         type: "number",
         description: "Primary key from the schedule table.",
+      },
+      {
+        name: "slug",
+        type: "string",
+        description: "Public class slug from the workout_types table.",
       },
       {
         name: "startTime",
@@ -133,7 +139,7 @@ const endpoints: EndpointDoc[] = [
         description: "One-based page number. Defaults to 1.",
       },
       {
-        name: "limit",
+        name: "pageSize",
         type: "number",
         description: "Items per page. Defaults to 10 and is capped at 50.",
       },
@@ -146,15 +152,18 @@ const endpoints: EndpointDoc[] = [
     ],
   },
   {
-    id: "sessions-detail",
+    id: "classes-detail",
     method: "GET",
-    path: "/api/sessions/[id]",
+    path: "/api/classes/[slug]",
     auth: "Bearer token",
     summary:
       "Returns deep metadata for one session plus enrollment state personalized to the bearer token.",
     request: "No request body.",
     response: pretty({
       id: 42,
+      slug: "morning-yoga-flow",
+      title: "Morning Yoga Flow",
+      description: "A calm mobility and breathing session.",
       startTime: "2026-05-28T09:00:00.000Z",
       trainerName: "Maya Carter",
       room: "Studio A",
@@ -162,7 +171,7 @@ const endpoints: EndpointDoc[] = [
       totalCapacity: 18,
       enrolledCount: 11,
       isEnrolled: true,
-      joinedMembers: ["Avery Stone", "Jordan Lee"],
+      members: ["Avery Stone", "Jordan Lee"],
       workout: {
         id: 3,
         title: "Morning Yoga Flow",
@@ -176,13 +185,18 @@ const endpoints: EndpointDoc[] = [
     }),
     error: pretty({
       success: false,
-      error: "Session not found",
+      error: "Class not found",
     }),
     fields: [
       {
         name: "id",
         type: "number",
-        description: "Primary key from the schedule table.",
+        description: "Internal schedule table primary key resolved from the slug.",
+      },
+      {
+        name: "slug",
+        type: "string",
+        description: "Public class slug used as the route parameter.",
       },
       {
         name: "startTime",
@@ -213,10 +227,10 @@ const endpoints: EndpointDoc[] = [
         name: "isEnrolled",
         type: "boolean",
         description:
-          "Dynamic value computed from the requesting bearer token userId and active bookings for this session.",
+          "Dynamic value computed from the requesting bearer token userId and active bookings for this class.",
       },
       {
-        name: "joinedMembers",
+        name: "members",
         type: "string[]",
         description: "Names of other members who have active bookings.",
       },
@@ -228,9 +242,9 @@ const endpoints: EndpointDoc[] = [
     ],
   },
   {
-    id: "sessions-join",
+    id: "classes-join",
     method: "POST",
-    path: "/api/sessions/[id]/join",
+    path: "/api/classes/[slug]/join",
     auth: "Bearer token",
     summary:
       "Creates an active booking for the authenticated user if capacity is available.",
@@ -239,6 +253,8 @@ const endpoints: EndpointDoc[] = [
       success: true,
       booking: {
         sessionId: 42,
+        classId: 42,
+        slug: "morning-yoga-flow",
         userId: 7,
         enrolledCount: 12,
         capacity: 18,
@@ -246,13 +262,18 @@ const endpoints: EndpointDoc[] = [
     }),
     error: pretty({
       success: false,
-      error: "Session is full",
+      error: "Class is full",
     }),
     fields: [
       {
         name: "sessionId",
         type: "number",
-        description: "Path parameter mapped to schedule.id.",
+        description: "Internal schedule id resolved from the slug route parameter.",
+      },
+      {
+        name: "slug",
+        type: "string",
+        description: "Public class slug used to resolve the schedule row.",
       },
       {
         name: "userId",
@@ -273,7 +294,7 @@ const endpoints: EndpointDoc[] = [
         name: "400 error",
         type: "object",
         description:
-          "Returned when the session id is invalid, the session does not exist, the class is full, or the mutation cannot be completed.",
+          "Returned when the slug is invalid, the class does not exist, capacity is full, or the mutation cannot be completed.",
       },
     ],
     notes: [
@@ -282,9 +303,9 @@ const endpoints: EndpointDoc[] = [
     ],
   },
   {
-    id: "sessions-leave",
+    id: "classes-leave",
     method: "POST",
-    path: "/api/sessions/[id]/leave",
+    path: "/api/classes/[slug]/leave",
     auth: "Bearer token",
     summary:
       "Deletes the authenticated user's active booking and decrements enrolledCount safely.",
@@ -292,6 +313,8 @@ const endpoints: EndpointDoc[] = [
     response: pretty({
       success: true,
       sessionId: 42,
+      classId: 42,
+      slug: "morning-yoga-flow",
       enrolledCount: 11,
       capacity: 18,
     }),
@@ -303,7 +326,12 @@ const endpoints: EndpointDoc[] = [
       {
         name: "sessionId",
         type: "number",
-        description: "Path parameter mapped to schedule.id.",
+        description: "Internal schedule id resolved from the slug route parameter.",
+      },
+      {
+        name: "slug",
+        type: "string",
+        description: "Public class slug used to resolve the schedule row.",
       },
       {
         name: "enrolledCount",
@@ -319,7 +347,7 @@ const endpoints: EndpointDoc[] = [
         name: "400 error",
         type: "object",
         description:
-          "Returned when the user tries to leave a session they never joined or no longer have an active booking for.",
+          "Returned when the user tries to leave a class they never joined or no longer have an active booking for.",
       },
     ],
     notes: ["The decrement uses GREATEST(enrolled_count - 1, 0) inside a transaction."],
@@ -455,7 +483,7 @@ export const GET = async () => {
                 <div class="mt-3 grid gap-2 sm:grid-cols-2">
                   <p><strong>200 OK</strong> for successful reads, already joined responses, and leave requests.</p>
                   <p><strong>201 Created</strong> when a new booking row is created.</p>
-                  <p><strong>400 Bad Request</strong> for malformed input, full sessions, missing bookings, or impossible mutations.</p>
+                  <p><strong>400 Bad Request</strong> for malformed input, full classes, missing bookings, or impossible mutations.</p>
                   <p><strong>401 Unauthorized</strong> for missing, expired, or invalid bearer tokens.</p>
                 </div>
               </section>

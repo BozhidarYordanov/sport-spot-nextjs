@@ -38,7 +38,7 @@ export default function LoginScreen() {
     setIsSubmitting(false);
 
     if (result.success) {
-      router.replace('/sessions');
+      router.replace('/classes');
       return;
     }
 

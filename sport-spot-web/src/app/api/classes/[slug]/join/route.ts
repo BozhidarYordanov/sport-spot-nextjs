@@ -1,17 +1,13 @@
 import { and, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+import { getClassSessionBySlug } from "@/app/api/classes/details";
 import { db } from "@/db";
 import { bookings, schedule } from "@/db/schema";
 import { authenticateRequest, isAuthResponse } from "@/lib/api-auth";
 
 type JoinContext = {
-  params: Promise<{ id: string }>;
-};
-
-const parseSessionId = (value: string) => {
-  const id = Number(value);
-  return Number.isInteger(id) && id > 0 ? id : null;
+  params: Promise<{ slug: string }>;
 };
 
 const getErrorMessage = (error: unknown) =>
@@ -23,37 +19,27 @@ export const POST = async (request: Request, { params }: JoinContext) => {
     return viewer;
   }
 
-  const { id: idParam } = await params;
-  const sessionId = parseSessionId(idParam);
-  if (!sessionId) {
+  const { slug: slugParam } = await params;
+  const slug = decodeURIComponent(slugParam).trim();
+  if (!slug) {
     return NextResponse.json(
-      { success: false, error: "Invalid session ID" },
+      { success: false, error: "Invalid class slug" },
       { status: 400 }
     );
   }
 
   try {
-    const existingSession = await db
-      .select({
-        id: schedule.id,
-        enrolledCount: schedule.enrolledCount,
-        capacity: schedule.capacity,
-      })
-      .from(schedule)
-      .where(eq(schedule.id, sessionId))
-      .limit(1);
-
-    const currentSession = existingSession[0];
+    const currentSession = await getClassSessionBySlug(slug);
     if (!currentSession) {
       return NextResponse.json(
-        { success: false, error: "Session not found" },
-        { status: 400 }
+        { success: false, error: "Class not found" },
+        { status: 404 }
       );
     }
 
     if (currentSession.enrolledCount >= currentSession.capacity) {
       return NextResponse.json(
-        { success: false, error: "Session is already full" },
+        { success: false, error: "Class is already full" },
         { status: 400 }
       );
     }
@@ -63,7 +49,7 @@ export const POST = async (request: Request, { params }: JoinContext) => {
       .from(bookings)
       .where(
         and(
-          eq(bookings.scheduleId, sessionId),
+          eq(bookings.scheduleId, currentSession.id),
           eq(bookings.userId, viewer.userId),
           eq(bookings.status, "active")
         )
@@ -72,13 +58,13 @@ export const POST = async (request: Request, { params }: JoinContext) => {
 
     if (existingBooking.length > 0) {
       return NextResponse.json(
-        { success: false, error: "You are already joined to this session" },
+        { success: false, error: "You are already joined to this class" },
         { status: 400 }
       );
     }
 
     await db.insert(bookings).values({
-      scheduleId: sessionId,
+      scheduleId: currentSession.id,
       userId: viewer.userId,
       status: "active",
     });
@@ -86,7 +72,7 @@ export const POST = async (request: Request, { params }: JoinContext) => {
     const updated = await db
       .update(schedule)
       .set({ enrolledCount: sql`${schedule.enrolledCount} + 1` })
-      .where(eq(schedule.id, sessionId))
+      .where(eq(schedule.id, currentSession.id))
       .returning({
         id: schedule.id,
         enrolledCount: schedule.enrolledCount,
@@ -99,7 +85,9 @@ export const POST = async (request: Request, { params }: JoinContext) => {
       {
         success: true,
         booking: {
-          sessionId,
+          sessionId: currentSession.id,
+          classId: currentSession.id,
+          slug,
           userId: viewer.userId,
           enrolledCount: session.enrolledCount,
           capacity: session.capacity,

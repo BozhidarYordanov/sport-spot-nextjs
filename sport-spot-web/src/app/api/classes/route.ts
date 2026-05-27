@@ -23,7 +23,11 @@ export const GET = async (request: Request) => {
 
   const url = new URL(request.url);
   const page = toPositiveInt(url.searchParams.get("page"), 1);
-  const limit = toPositiveInt(url.searchParams.get("limit"), 10, 50);
+  const pageSize = toPositiveInt(
+    url.searchParams.get("pageSize") ?? url.searchParams.get("limit"),
+    10,
+    50
+  );
   const search = url.searchParams.get("search")?.trim();
   const now = new Date();
 
@@ -40,10 +44,11 @@ export const GET = async (request: Request) => {
   }
 
   const whereClause = and(...filters);
-  const [sessions, totalRows] = await Promise.all([
+  const [classes, totalRows] = await Promise.all([
     db
       .select({
         id: schedule.id,
+        slug: workoutTypes.slug,
         startTime: schedule.startTime,
         trainerName: schedule.trainerName,
         room: schedule.room,
@@ -64,8 +69,8 @@ export const GET = async (request: Request) => {
       .innerJoin(workoutTypes, eq(schedule.workoutTypeId, workoutTypes.id))
       .where(whereClause)
       .orderBy(asc(schedule.startTime))
-      .limit(limit)
-      .offset((page - 1) * limit),
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
     db
       .select({ value: sql<number>`count(*)` })
       .from(schedule)
@@ -76,10 +81,11 @@ export const GET = async (request: Request) => {
   const total = Number(totalRows[0]?.value ?? 0);
 
   return NextResponse.json({
+    success: true,
     total,
     page,
-    pageSize: limit,
-    totalPages: Math.ceil(total / limit),
-    items: sessions,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+    items: classes,
   });
 };

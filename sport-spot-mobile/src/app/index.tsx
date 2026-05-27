@@ -8,7 +8,7 @@ export default function HomeScreen() {
   const { isLoggedIn, logout, user } = useAuth();
 
   const handlePrimaryAction = () => {
-    router.push(isLoggedIn ? '/sessions' : '/login');
+    router.push(isLoggedIn ? '/classes' : '/login');
   };
 
   return (

@@ -68,7 +68,7 @@ export default function RegisterScreen() {
     setIsSubmitting(false);
 
     if (result.success) {
-      router.replace('/sessions');
+      router.replace('/classes');
       return;
     }
 

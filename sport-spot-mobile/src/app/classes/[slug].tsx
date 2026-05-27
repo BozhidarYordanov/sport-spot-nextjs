@@ -29,6 +29,7 @@ type Workout = {
 
 type Session = {
   id: number;
+  slug: string;
   startTime: string;
   trainerName: string;
   room: string;
@@ -47,6 +48,14 @@ type SessionActionResponse = {
     enrolledCount?: number;
   };
 };
+
+type ClassDetailsResponse =
+  | Session
+  | {
+      success?: boolean;
+      error?: unknown;
+      session?: Session;
+    };
 
 const badgeColors = ['#fce7f3', '#dcfce7', '#e0f2fe', '#fef3c7', '#ede9fe'];
 
@@ -95,16 +104,16 @@ function getUnknownResponseError(data: unknown, fallback: string) {
   return typeof error === 'string' ? error : fallback;
 }
 
-export default function SessionDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  const sessionId = firstParam(id);
+export default function ClassDetailsScreen() {
+  const { slug } = useLocalSearchParams<{ slug?: string | string[] }>();
+  const sessionSlug = firstParam(slug);
   const { token } = useAuth();
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const canFetch = useMemo(() => Boolean(API_BASE_URL && token && sessionId), [sessionId, token]);
+  const canFetch = useMemo(() => Boolean(API_BASE_URL && token && sessionSlug), [sessionSlug, token]);
   const startTime = session ? formatStartTime(session.startTime) : null;
   const spotsRemaining = session ? Math.max(session.capacity - session.enrolledCount, 0) : 0;
   const isClassFull = Boolean(session && !session.isEnrolled && spotsRemaining <= 0);
@@ -116,8 +125,8 @@ export default function SessionDetailsScreen() {
       return;
     }
 
-    if (!sessionId) {
-      setErrorMessage('Missing session ID.');
+    if (!sessionSlug) {
+      setErrorMessage('Missing class slug.');
       setIsLoading(false);
       return;
     }
@@ -132,30 +141,32 @@ export default function SessionDetailsScreen() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`, {
+      const response = await fetch(`${API_BASE_URL}/classes/${encodeURIComponent(sessionSlug)}`, {
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = (await response.json()) as Session | { error?: unknown };
+      const data = (await response.json()) as ClassDetailsResponse;
 
       if (!response.ok) {
         throw new Error(getUnknownResponseError(data, 'Unable to load class details.'));
       }
 
+      const nextSession = 'session' in data && data.session ? data.session : (data as Session);
+
       setSession({
-        ...(data as Session),
-        isEnrolled: Boolean((data as Session).isEnrolled),
-        members: Array.isArray((data as Session).members) ? (data as Session).members : [],
+        ...nextSession,
+        isEnrolled: Boolean(nextSession.isEnrolled),
+        members: Array.isArray(nextSession.members) ? nextSession.members : [],
       });
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to load class details.');
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, token]);
+  }, [sessionSlug, token]);
 
   useEffect(() => {
     if (canFetch) {
@@ -176,7 +187,7 @@ export default function SessionDetailsScreen() {
     try {
       setIsActionLoading(true);
 
-      const response = await fetch(`${API_BASE_URL}/sessions/${session.id}/${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/classes/${encodeURIComponent(session.slug)}/${endpoint}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',

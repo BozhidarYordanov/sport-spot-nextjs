@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { type Href, router, useFocusEffect } from 'expo-router';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme/colors';
@@ -30,6 +30,7 @@ type Workout = {
 
 type Session = {
   id: number;
+  slug: string;
   startTime: string;
   trainerName: string;
   room: string;
@@ -38,12 +39,16 @@ type Session = {
   workout: Workout;
 };
 
-type SessionsResponse = {
+type SessionPayload = Omit<Session, 'slug'> & {
+  slug?: string | null;
+};
+
+type ClassesResponse = {
   total?: number;
   page?: number;
   pageSize?: number;
   totalPages?: number;
-  items?: Session[];
+  items?: SessionPayload[];
 };
 
 const badgeColors = ['#fce7f3', '#dcfce7', '#e0f2fe', '#fef3c7', '#ede9fe'];
@@ -69,7 +74,14 @@ function getBadgeColor(category: string) {
   return badgeColors[hash % badgeColors.length];
 }
 
-export default function SessionsScreen() {
+function normalizeSession(item: SessionPayload): Session {
+  return {
+    ...item,
+    slug: item.slug ?? item.workout.slug ?? String(item.id),
+  };
+}
+
+export default function ClassesScreen() {
   const { token, user, isLoading: isAuthLoading } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [page, setPage] = useState(1);
@@ -106,20 +118,20 @@ export default function SessionsScreen() {
 
         setErrorMessage(null);
 
-        const response = await fetch(`${API_BASE_URL}/sessions?page=${targetPage}&pageSize=${PAGE_SIZE}`, {
+        const response = await fetch(`${API_BASE_URL}/classes?page=${targetPage}&pageSize=${PAGE_SIZE}`, {
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const data = (await response.json()) as SessionsResponse;
+        const data = (await response.json()) as ClassesResponse;
 
         if (!response.ok) {
           throw new Error('Unable to load classes. Please try again.');
         }
 
-        const nextItems = Array.isArray(data.items) ? data.items : [];
+        const nextItems = Array.isArray(data.items) ? data.items.map(normalizeSession) : [];
         fetchedPages.current.add(targetPage);
 
         setSessions((current) => (targetPage === 1 ? nextItems : [...current, ...nextItems]));
@@ -172,7 +184,7 @@ export default function SessionsScreen() {
       <TouchableOpacity
         activeOpacity={0.86}
         style={styles.card}
-        onPress={() => router.push({ pathname: '/session-details', params: { id: String(item.id) } })}
+        onPress={() => router.push(`/classes/${item.slug}` as Href)}
       >
         <View style={styles.cardHeader}>
           <View style={[styles.badge, { backgroundColor: getBadgeColor(category) }]}>
